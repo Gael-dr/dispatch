@@ -3,7 +3,7 @@
  * Ce fichier montre différentes façons de personnaliser les boutons
  */
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 import { Heart, ArrowRight, Download, Trash2, Check } from 'lucide-react'
 import { createColor } from '@/lib/colors'
 
@@ -14,7 +14,9 @@ export function ButtonExamples() {
 
   return (
     <div className="space-y-8 p-6">
-      <h2 className="text-2xl font-bold">Exemples de personnalisation des boutons</h2>
+      <h2 className="text-2xl font-bold">
+        Exemples de personnalisation des boutons
+      </h2>
 
       {/* 1. Variantes de base */}
       <section className="space-y-4">
@@ -44,7 +46,9 @@ export function ButtonExamples() {
 
       {/* 3. Personnalisation avec className */}
       <section className="space-y-4">
-        <h3 className="text-lg font-semibold">3. Personnalisation avec className</h3>
+        <h3 className="text-lg font-semibold">
+          3. Personnalisation avec className
+        </h3>
         <div className="flex flex-wrap gap-2">
           <Button className="bg-purple-500 hover:bg-purple-600 text-white">
             Purple
@@ -66,7 +70,9 @@ export function ButtonExamples() {
 
       {/* 4. Couleurs OKLCH personnalisées */}
       <section className="space-y-4">
-        <h3 className="text-lg font-semibold">4. Couleurs OKLCH personnalisées</h3>
+        <h3 className="text-lg font-semibold">
+          4. Couleurs OKLCH personnalisées
+        </h3>
         <div className="flex flex-wrap gap-2">
           <Button
             style={{
@@ -142,9 +148,7 @@ export function ButtonExamples() {
         <h3 className="text-lg font-semibold">8. Responsive</h3>
         <div className="space-y-2">
           <Button className="w-full sm:w-auto">Full width (mobile)</Button>
-          <Button className="w-full md:w-1/2 lg:w-1/3">
-            Responsive width
-          </Button>
+          <Button className="w-full md:w-1/2 lg:w-1/3">Responsive width</Button>
         </div>
       </section>
 
@@ -159,9 +163,7 @@ export function ButtonExamples() {
             <ArrowRight className="mr-2" />
             Avancé
           </Button>
-          <Button
-            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          >
+          <Button className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl transition-all duration-300">
             Multi-gradient
           </Button>
         </div>
@@ -169,4 +171,3 @@ export function ButtonExamples() {
     </div>
   )
 }
-

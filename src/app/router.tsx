@@ -1,9 +1,14 @@
+import Decisions from '@/pages/Decisions'
+import Home from '@/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
-import Inbox from '../pages/Inbox'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Inbox />,
+    element: <Home />,
+  },
+  {
+    path: '/decisions',
+    element: <Decisions />,
   },
 ])

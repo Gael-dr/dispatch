@@ -3,7 +3,12 @@
  * Ce fichier sert de référence pour comprendre comment utiliser les couleurs
  */
 
-import { createColor, createGray, colorExamples, createColorScale } from '@/lib/colors'
+import {
+  createColor,
+  createGray,
+  colorExamples,
+  createColorScale,
+} from '@/lib/colors'
 
 export function ColorExample() {
   // Exemple 1: Utilisation directe des variables CSS
@@ -100,4 +105,3 @@ export function ColorExample() {
     </div>
   )
 }
-

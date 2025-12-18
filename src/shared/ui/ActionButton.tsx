@@ -1,6 +1,9 @@
+import { Button } from './button'
+import { Icon } from './Icon'
+
 interface ActionButtonProps {
   label: string
-  type: 'primary' | 'secondary' | 'danger'
+  type: 'primary' | 'secondary' | 'destructive'
   onClick: () => void
   icon?: string
   disabled?: boolean
@@ -14,13 +17,19 @@ export function ActionButton({
   disabled = false,
 }: ActionButtonProps) {
   return (
-    <button
-      className={`action-button action-button--${type}`}
-      onClick={onClick}
+    <Button
+      variant={
+        type === 'primary'
+          ? 'default'
+          : type === 'secondary'
+            ? 'secondary'
+            : 'destructive'
+      }
       disabled={disabled}
+      onClick={onClick}
     >
-      {icon && <span className="action-button__icon">{icon}</span>}
-      <span className="action-button__label">{label}</span>
-    </button>
+      {icon && <Icon name={icon} />}
+      {label}
+    </Button>
   )
 }

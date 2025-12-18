@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { InteractionProvider } from './interaction/InteractionProvider'
+import { ThemeProvider } from './theme/ThemeProvider'
 
 interface ProvidersProps {
   children?: ReactNode
@@ -9,8 +10,10 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <InteractionProvider>
-      {children || <RouterProvider router={router} />}
-    </InteractionProvider>
+    <ThemeProvider>
+      <InteractionProvider>
+        {children || <RouterProvider router={router} />}
+      </InteractionProvider>
+    </ThemeProvider>
   )
 }

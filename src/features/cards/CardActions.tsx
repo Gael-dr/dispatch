@@ -20,16 +20,6 @@ export function CardActions({ card: _card, onAction }: CardActionsProps) {
         type="primary"
         onClick={() => handleAction('approve')}
       />
-      <ActionButton
-        label="Reject"
-        type="danger"
-        onClick={() => handleAction('reject')}
-      />
-      <ActionButton
-        label="Defer"
-        type="secondary"
-        onClick={() => handleAction('defer')}
-      />
     </ActionBar>
   )
 }

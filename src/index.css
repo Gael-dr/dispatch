@@ -5,7 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -66,6 +70,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
@@ -90,6 +95,14 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.brand-text {
+  background: linear-gradient(90deg, #ffffff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  @apply text-4xl font-bold tracking-tight mb-2;
 }
 
 @media (prefers-color-scheme: light) {
@@ -147,9 +160,9 @@ button:focus-visible {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --background: oklch(0.1288 0.0406 264.7);
+  --foreground: oklch(0.9288 0.0126 255.51);
+  --card: oklch(0.2069 0.0403 263.99);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -184,7 +197,15 @@ button:focus-visible {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    overflow: hidden;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    overflow: hidden;
+  }
+  code,
+  pre {
+    @apply font-mono;
   }
 }
