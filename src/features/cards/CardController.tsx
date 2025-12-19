@@ -1,8 +1,6 @@
 import { ReactNode } from 'react'
 import { Card } from '../../engine/card.types'
 import { CardView } from './CardView'
-import { CardActions } from './CardActions'
-import { CardFeedback } from './CardFeedback'
 
 interface CardControllerProps {
   card: Card
@@ -16,10 +14,8 @@ export function CardController({
   children,
 }: CardControllerProps) {
   return (
-    <div className="card-controller">
-      <CardView card={card} />
-      <CardActions card={card} onAction={onAction} />
-      <CardFeedback />
+    <div className="card-controller flex flex-col gap-4">
+      <CardView card={card} onAction={onAction} />
       {children}
     </div>
   )

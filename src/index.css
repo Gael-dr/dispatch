@@ -36,7 +36,7 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.5772 0.2151 27.12);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -53,6 +53,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background-secondary: oklch(0.2069 0.0403 263.99);
 }
 
 a {
@@ -73,36 +74,12 @@ body {
   overflow: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
 .brand-text {
   background: linear-gradient(90deg, #ffffff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  @apply text-4xl font-bold tracking-tight mb-2;
+  @apply text-4xl font-extrabold tracking-tight mb-2;
 }
 
 @media (prefers-color-scheme: light) {
@@ -161,6 +138,7 @@ button:focus-visible {
 
 .dark {
   --background: oklch(0.1288 0.0406 264.7);
+  --background-secondary: oklch(0.2069 0.0403 263.99);
   --foreground: oklch(0.9288 0.0126 255.51);
   --card: oklch(0.2069 0.0403 263.99);
   --card-foreground: oklch(0.985 0 0);

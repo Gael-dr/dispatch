@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Custom colors
+        'background-secondary': 'oklch(0.2069 0.0403 263.99)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

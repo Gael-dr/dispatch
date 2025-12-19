@@ -176,7 +176,7 @@ export function SwipeToUnlock({
     <div
       ref={trackRef}
       className={cn(
-        'relative w-full max-w-sm h-18 rounded-full bg-card',
+        'relative w-full max-w-sm h-18 rounded-full bg-background-secondary',
         'backdrop-blur-sm',
         'border border-border',
         'overflow-hidden',

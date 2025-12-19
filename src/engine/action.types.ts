@@ -1,6 +1,16 @@
 // Action types definition
 
-export type ActionType = 'approve' | 'reject' | 'defer' | 'archive' | 'custom'
+export type ActionType =
+  | 'approve'
+  | 'reject'
+  | 'defer'
+  | 'archive'
+  | 'schedule'
+  | 'read'
+  | 'mark-urgent'
+  | 'mark-done'
+  | 'ignore'
+  | 'custom'
 
 export interface Action {
   id: string

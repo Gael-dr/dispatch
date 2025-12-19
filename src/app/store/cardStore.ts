@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { Card } from '../../engine/card.types'
 import { Action, ActionResult } from '../../engine/action.types'
 import { cardExecutor } from '../../engine/card.executor'
+import { generateMockCards } from './mockCards'
 
 export interface CardState {
   // State
@@ -24,7 +25,7 @@ export interface CardState {
 
 export const useCardStore = create<CardState>((set, get) => ({
   // Initial state
-  cards: [],
+  cards: generateMockCards(9),
   selectedCardId: null,
   isLoading: false,
   error: null,

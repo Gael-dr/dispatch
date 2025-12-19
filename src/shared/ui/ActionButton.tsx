@@ -1,35 +1,61 @@
+import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { Icon } from './Icon'
 
 interface ActionButtonProps {
   label: string
-  type: 'primary' | 'secondary' | 'destructive'
+  buttonType: 'primary' | 'secondary' | 'destructive'
   onClick: () => void
   icon?: string
   disabled?: boolean
 }
 
+/**
+ * Bouton pour les actions principales des cards
+ * Style grand et visible, différent des QuickButton
+ */
 export function ActionButton({
   label,
-  type,
+  buttonType,
   onClick,
   icon,
   disabled = false,
 }: ActionButtonProps) {
+  // Variant du Button shadcn
+  const buttonVariant =
+    buttonType === 'primary'
+      ? 'default'
+      : buttonType === 'destructive'
+        ? 'destructive'
+        : 'secondary'
+
+  // Styles spécifiques pour le bouton primary (bleu avec texte blanc)
+  const getPrimaryStyles = () => {
+    if (buttonType === 'primary') {
+      return '!bg-blue-500 !text-white hover:!bg-blue-600'
+    }
+    if (buttonType === 'destructive') {
+      return '!bg-red-500 !text-white hover:!bg-red-600'
+    }
+    if (buttonType === 'secondary') {
+      return '!bg-slate-500 !text-white hover:!bg-slate-600'
+    }
+    return ''
+  }
+
   return (
     <Button
-      variant={
-        type === 'primary'
-          ? 'default'
-          : type === 'secondary'
-            ? 'secondary'
-            : 'destructive'
-      }
+      variant={buttonVariant}
+      size="lg"
       disabled={disabled}
       onClick={onClick}
+      className={cn(
+        'min-w-[120px] w-full font-semibold shadow-md hover:shadow-lg transition-all',
+        getPrimaryStyles()
+      )}
     >
       {icon && <Icon name={icon} />}
-      {label}
+      <span>{label}</span>
     </Button>
   )
 }
