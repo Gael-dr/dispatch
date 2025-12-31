@@ -10,6 +10,8 @@ export interface CalendarPayload {
   description?: string
   startDate: Date
   endDate?: Date
+  severity?: 'info' | 'warning' | 'error' | 'success'
+  context?: { message: string }
   location?: string
   attendees?: string[]
   status?: 'confirmed' | 'tentative' | 'cancelled'
@@ -32,6 +34,7 @@ export interface CalendarPayload {
 export interface NotificationPayload {
   title: string
   message: string
+  context?: { message: string } // Contexte additionnel pour la notification
   icon?: string
   severity?: 'info' | 'warning' | 'error' | 'success'
   read?: boolean

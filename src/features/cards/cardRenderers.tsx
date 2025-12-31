@@ -5,9 +5,10 @@
 import { CalendarPayload, NotificationPayload } from '@/engine/card.payloads'
 import { Card } from '@/engine/card.types'
 import { getAvailableActions } from '@/engine/policies/card.policy'
-import { AlertCircle, Calendar, CheckCircle2, Info } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
 import { CardActions } from './CardActions'
 import { CardHeader } from './CardHeader'
+import ContextBubble from '@/shared/ui/ContextBubble'
 
 /**
  * Renderer pour une card de type "calendar"
@@ -21,23 +22,10 @@ export function CalendarCardRenderer({
   card: Card
   onAction?: (actionId: string) => void
 }) {
-  const getStatusColor = () => {
-    switch (payload.status) {
-      case 'confirmed':
-        return 'bg-green-500/20 text-green-400'
-      case 'tentative':
-        return 'bg-yellow-500/20 text-yellow-400'
-      case 'cancelled':
-        return 'bg-red-500/20 text-red-400'
-      default:
-        return 'bg-blue-500/20 text-blue-400'
-    }
-  }
-
   return (
-    <div className="w-full min-h-[400px] max-h-[600px] h-[60vh] sm:h-[500px] md:h-[550px] rounded-4xl sm:rounded-4xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col">
+    <div className="w-full min-h-100 max-h-150 h-[60vh] sm:h-125 md:h-137.5 rounded-4xl sm:rounded-4xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col">
       {/* Header avec CardHeader réutilisable */}
-      {payload.sender ? (
+      {payload.sender && (
         <CardHeader
           avatar={{
             initials: payload.sender.initials,
@@ -56,25 +44,13 @@ export function CalendarCardRenderer({
           timestamp={payload.startDate}
           showTopBorder={false}
         />
-      ) : (
-        <div className="p-4 sm:p-6 border-b border-border">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2">
-            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-              {payload.title}
-            </h2>
-          </div>
-          {payload.status && (
-            <span
-              className={`inline-block px-2 py-1 rounded text-xs font-semibold ${getStatusColor()}`}
-            >
-              {payload.status.toUpperCase()}
-            </span>
-          )}
-        </div>
       )}
 
       <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-3 sm:space-y-4">
+        <ContextBubble
+          severity={payload.severity}
+          message={payload.context?.message}
+        />
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
           {payload.title}
         </h2>
@@ -130,7 +106,7 @@ export function NotificationCardRenderer({
 
   return (
     <div
-      className={`w-full min-h-[350px] max-h-[500px] h-[50vh] sm:h-[400px] md:h-[450px] rounded-2xl sm:rounded-4xl border shadow-2xl overflow-hidden flex flex-col ${getSeverityColor()}`}
+      className={`w-full min-h-87.5 max-h-125 h-[50vh] sm:h-100 md:h-112.5 rounded-2xl sm:rounded-4xl border shadow-2xl overflow-hidden flex flex-col ${getSeverityColor()}`}
     >
       {/* Header avec CardHeader réutilisable */}
       {payload.sender ? (

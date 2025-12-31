@@ -66,6 +66,7 @@ export function generateMockCards(count: number = 9): Card[] {
           'Vous avez reçu une notification importante qui nécessite votre attention.',
         severity: 'info',
         read: false,
+        context: { message: 'Message important à lire.' },
         timestamp: new Date(now.getTime() - i * 60000),
         sender: {
           name: 'Xavier Niel',
