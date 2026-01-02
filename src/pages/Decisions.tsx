@@ -1,5 +1,6 @@
 import { useCardStore } from '@/app/store/cardStore'
 import { CardStack } from '@/features/cards/CardStack'
+import { UserAvatar } from '@/features/user/UserAvatar'
 import { useMemo } from 'react'
 
 export default function Decisions() {
@@ -63,10 +64,13 @@ export default function Decisions() {
             ⚡️ DON'T READ. DECIDE.
           </p>
         </div>
-        {/* Compteur de cartes */}
-        <p className="text-sm font-semibold text-foreground">
-          {stats.processed} &nbsp;/&nbsp; {stats.total}
-        </p>
+        {/* Compteur de cartes & avatar */}
+        <div className="flex items-center gap-4">
+          <p className="text-sm font-semibold text-foreground">
+            {stats.processed} &nbsp;/&nbsp; {stats.total}
+          </p>
+          <UserAvatar />
+        </div>
       </div>
 
       {/* Barre de progression */}
