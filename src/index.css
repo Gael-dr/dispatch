@@ -78,12 +78,14 @@ body {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
-  button {
+
+  /* button {
     background-color: #f9f9f9;
-  }
+  } */
 }
 
 @theme inline {
@@ -166,13 +168,16 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     overflow: hidden;
   }
+
   body {
     @apply bg-background text-foreground font-sans;
     overflow: hidden;
   }
+
   code,
   pre {
     @apply font-mono;
