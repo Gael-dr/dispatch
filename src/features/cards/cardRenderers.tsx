@@ -5,10 +5,10 @@
 import { CalendarPayload, NotificationPayload } from '@/engine/card.payloads'
 import { Card } from '@/engine/card.types'
 import { getAvailableActions } from '@/engine/policies/card.policy'
+import ContextBubble from '@/shared/ui/ContextBubble'
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
 import { CardActions } from './CardActions'
 import { CardHeader } from './CardHeader'
-import ContextBubble from '@/shared/ui/ContextBubble'
 
 /**
  * Renderer pour une card de type "calendar"
@@ -46,20 +46,20 @@ export function CalendarCardRenderer({
         />
       )}
 
-      <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-3 sm:space-y-4">
-        <ContextBubble
-          severity={payload.severity}
-          message={payload.context?.message}
-        />
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-          {payload.title}
-        </h2>
-        <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">
-          {payload.description}
-        </p>
-      </div>
-      {/* Actions principales à l'intérieur de la card */}
-      <div className="p-3 sm:p-4 border-t border-border">
+      <div className="flex flex-col justify-between p-4 sm:p-6 overflow-y-auto gap-4 h-full bg-[#172030]">
+        <div className="flex flex-col gap-2">
+          <ContextBubble
+            severity={payload.severity}
+            message={payload.context?.message}
+          />
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
+            {payload.title}
+          </h2>
+          <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">
+            {payload.description}
+          </p>
+        </div>
+        {/* Actions principales à l'intérieur de la card */}
         <CardActions actions={getAvailableActions(card)} onAction={onAction} />
       </div>
     </div>

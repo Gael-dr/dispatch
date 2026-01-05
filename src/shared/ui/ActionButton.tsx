@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils'
+import type { ComponentProps } from 'react'
 import { Button } from './button'
 import { Icon } from './Icon'
-
 interface ActionButtonProps {
   label: string
   buttonType: 'primary' | 'secondary' | 'destructive'
   onClick: () => void
-  icon?: string
+  icon?: ComponentProps<typeof Icon>['name']
   disabled?: boolean
 }
 
@@ -38,7 +38,7 @@ export function ActionButton({
       return '!bg-red-500 !text-white hover:!bg-red-600'
     }
     if (buttonType === 'secondary') {
-      return '!bg-slate-500 !text-white hover:!bg-slate-600'
+      return '!bg-slate-800 !text-white hover:!bg-slate-600'
     }
     return ''
   }
@@ -50,11 +50,11 @@ export function ActionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'min-w-[120px] w-full font-semibold shadow-md hover:shadow-lg transition-all',
+        'min-w-30 w-full font-semibold border rounded-xl shadow-md hover:shadow-lg transition-all py-6',
         getPrimaryStyles()
       )}
     >
-      {icon && <Icon name={icon} />}
+      {icon && <Icon name={icon} size={20} />}
       <span>{label}</span>
     </Button>
   )

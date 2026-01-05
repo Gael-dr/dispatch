@@ -16,7 +16,7 @@ const ACTION_TO_BUTTON_TYPE: Record<
   reject: 'destructive',
   defer: 'secondary',
   archive: 'secondary',
-  schedule: 'primary',
+  schedule: 'secondary',
   read: 'secondary',
   'mark-urgent': 'primary',
   'mark-done': 'secondary',
@@ -52,7 +52,7 @@ export function getQuickActions(): Action[] {
       type: 'ignore',
       label: 'IGNORER',
       requiresConfirmation: false,
-    },
+    }
   ]
 }
 
@@ -71,18 +71,21 @@ export function getAvailableActions(card: Card): Action[] {
         id: 'accept',
         type: 'approve',
         label: 'Accepter',
+        icon: 'Check',
         requiresConfirmation: false,
       },
       {
-        id: 'decline',
+        id: 'schedule',
+        type: 'schedule',
+        label: 'Proposer un Créneau',
+        icon: 'Calendar',
+        requiresConfirmation: false,
+      },
+      {
+        id: 'reject',
         type: 'reject',
         label: 'Refuser',
-        requiresConfirmation: false,
-      },
-      {
-        id: 'tentative',
-        type: 'defer',
-        label: 'Peut-être',
+        icon: 'X',
         requiresConfirmation: false,
       },
     ],

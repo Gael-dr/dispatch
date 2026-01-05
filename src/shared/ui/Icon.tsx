@@ -1,22 +1,40 @@
-interface IconProps {
-  name: string
+import { cn } from '@/lib/utils'
+import * as LucideIcons from 'lucide-react'
+import React from 'react'
+
+type LucideName = keyof typeof LucideIcons
+
+export function Icon({
+  name,
+  size = 16,
+  className,
+  ...props
+}: {
+  name: LucideName
   size?: number
   className?: string
-}
+} & React.SVGProps<SVGSVGElement>) {
+  const IconComponent = (LucideIcons as unknown as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name]
 
-export function Icon({ name, size = 24, className }: IconProps) {
+  if (!IconComponent) {
+    // placeholder empty box to keep layout if icon missing
+    return (
+      <span
+        className={cn('inline-block bg-slate-600/20 rounded-sm', className)}
+        style={{ width: size, height: size }}
+        aria-hidden
+      />
+    )
+  }
+
   return (
-    <svg
-      className={`icon icon--${name} ${className || ''}`}
+    <IconComponent
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      {/* Icon content would be loaded from an icon library or SVG sprite */}
-      <title>{name}</title>
-    </svg>
+      className={cn('inline-block', className)}
+      {...props}
+    />
   )
 }
+
+export default Icon

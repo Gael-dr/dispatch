@@ -47,7 +47,7 @@ export default function ContextBubble({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 mb-2 rounded-xl px-4 py-4 border',
+        'flex items-center gap-2 mb-2 rounded-xl px-2 py-2 border',
         cfg.bg,
         cfg.border
       )}

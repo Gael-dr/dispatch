@@ -2,10 +2,15 @@
 // ✅ S'adapte à différentes sources de contenu (Gmail, LinkedIn, etc.)
 
 import { cn } from '@/lib/utils'
-import { Eye, Mail, Settings } from 'lucide-react'
+import { Eye, Linkedin, Mail, Settings, Slack } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui/popover"
 
 export interface CardHeaderSource {
-  type: 'gmail' | 'linkedin' | 'direct' | 'calendar' | 'custom'
+  type: 'gmail' | 'linkedin' | 'direct' | 'calendar' | 'custom' | 'slack'
   label: string
   icon?: React.ReactNode
   color?: string
@@ -40,7 +45,11 @@ function getSourceIcon(source: CardHeaderSource): React.ReactNode {
 
   switch (source.type) {
     case 'gmail':
-      return <Mail className="w-4 h-4" />
+      return <Mail className="w-3 h-3" />
+    case 'linkedin':
+      return <Linkedin className="w-3 h-3" />
+    case 'slack':
+      return <Slack className="w-3 h-3" />
     default:
       return null
   }
@@ -77,17 +86,17 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'p-4 sm:p-6 border-b border-border',
+        'p-4 sm:p-6 border-b border-border bg-[#182134]',
         showTopBorder && `border-t-2 ${borderColor}`,
         className
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-1">
         {/* Left side - User info */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* Avatar */}
           {avatar && (
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted flex items-center justify-center text-foreground font-bold text-base sm:text-lg shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted flex items-center justify-center text-foreground font-bold text-base sm:text-lg shrink-0 border border-border">
               {avatar.image ? (
                 <img
                   src={avatar.image}
@@ -102,9 +111,16 @@ export function CardHeader({
 
           {/* Name and role */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-foreground truncate">
-              {name}
-            </h3>
+            <Popover>
+              <PopoverTrigger>
+                <h3 className="text-base sm:text-lg font-bold text-foreground truncate">
+                  {name}
+                </h3>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit">
+                <p className="text-sm text-muted-foreground">{name}</p>
+              </PopoverContent>
+            </Popover>
             {role && (
               <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {role}
@@ -123,7 +139,7 @@ export function CardHeader({
                 getSourceColor(source)
               )}
             >
-              {getSourceIcon(source)}
+              {source.icon || getSourceIcon(source)}
               <span className="text-[10px] sm:text-xs font-medium">
                 {source.label}
               </span>
