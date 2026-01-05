@@ -32,6 +32,7 @@ export function generateMockCards(count: number = 9): Card[] {
         description: `Contenu du rendez-vous ${i}. Ce rendez-vous nécessite votre attention et une prise de décision rapide.`,
         startDate: new Date(now.getTime() + i * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + (i + 1) * 24 * 60 * 60 * 1000),
+        context: { message: 'Message important à lire.' },
         location: ['Paris', 'Lyon', 'Marseille'][i % 3],
         attendees: [
           ['John Doe', 'Jane Smith'],
