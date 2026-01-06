@@ -53,17 +53,12 @@ export default function Login() {
     }
 
     return (
-        <main className="relative h-[100dvh] w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-28 flex items-start sm:items-center justify-center">
+        <main className="relative h-[100svh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-[max(env(safe-area-inset-bottom),16px)] flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
 
-            {/* background */}
-            <div className="absolute inset-0 bg-background" />
-            <div className="absolute inset-0 bg-[radial-gradient(900px_circle_at_20%_10%,rgba(59,130,246,0.14),transparent_45%),radial-gradient(900px_circle_at_80%_25%,rgba(168,85,247,0.12),transparent_50%),radial-gradient(1000px_circle_at_40%_85%,rgba(14,165,233,0.10),transparent_55%)]" />
-            <div className="absolute inset-0 opacity-[0.25] [background-image:linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.06)_1px,transparent_1px)] [background-size:28px_28px]" />
-            <div className="pointer-events-none absolute -top-24 left-1/2 h-56 w-[44rem] -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl" />
 
             {/* card */}
             <section className="relative w-full max-w-sm">
-                <div className="rounded-3xl border border-white/10 bg-background-secondary/55 shadow-2xl backdrop-blur-xl overflow-hidden">
+                <div className="rounded-3xl border border-white/10 bg-background-secondary/55 shadow-2xl  overflow-hidden">
                     {/* top bar */}
                     <div className="px-6 pt-6 pb-4 border-b border-white/10">
                         <div className="flex items-center gap-3">
