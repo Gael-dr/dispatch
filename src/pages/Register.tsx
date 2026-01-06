@@ -53,7 +53,7 @@ export default function Register() {
     }
 
     return (
-        <main className="relative h-[100dvh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-28 flex items-start sm:items-center justify-center">
+        <main className="relative h-[100dvh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-8 flex items-start sm:items-center justify-center">
 
 
             {/* card */}

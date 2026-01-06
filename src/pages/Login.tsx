@@ -53,7 +53,7 @@ export default function Login() {
     }
 
     return (
-        <main className="relative h-[100svh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-[max(env(safe-area-inset-bottom),16px)] flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
+        <main className="relative h-[100svh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-8 flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
 
 
             {/* card */}
