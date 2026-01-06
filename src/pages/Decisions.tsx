@@ -55,7 +55,7 @@ export default function Decisions() {
       className="flex flex-col h-screen w-screen px-4 pt-10 overflow-hidden"
       style={{ backgroundColor: 'oklch(0.2069 0.0403 263.99)' }}
     >
-      <div className="flex flex-row justify-between items-center mb-6">
+      <div className="flex flex-row justify-between items-center mb-4">
         <div className="flex flex-col justify-start mb-1">
           <h1 className="text-xl font-extrabold tracking-tight text-white mb-1">
             DISPATCH
@@ -83,10 +83,8 @@ export default function Decisions() {
         </div>
       </div>
 
-      <div className="w-full flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-lg">
-          <CardStack cards={pendingCards} onCardAction={handleCardAction} />
-        </div>
+      <div className="w-full max-w-lg overflow-hidden flex-1 mx-auto">
+        <CardStack cards={pendingCards} onCardAction={handleCardAction} />
       </div>
     </section>
   )

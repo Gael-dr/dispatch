@@ -33,7 +33,7 @@ export function getCardRenderer(
       // Fallback pour les types inconnus
       const payload = card.payload as Record<string, unknown>
       return (
-        <div className="w-full h-[500px] rounded-2xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col p-6">
+        <div className="w-full h-125 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col p-6">
           <h2 className="text-2xl font-bold text-foreground mb-4">
             {(payload.title as string) || 'Card'}
           </h2>

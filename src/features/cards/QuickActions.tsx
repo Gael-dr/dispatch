@@ -15,7 +15,7 @@ export function QuickActions({ onAction }: QuickActionsProps) {
   const quickActions = getQuickActions()
 
   return (
-    <div className="flex items-center justify-between gap-2 w-full py-2 px-4 fixed bottom-0 left-0 right-0">
+    <div className="flex items-center justify-between gap-2 w-full py-4 px-4 fixed bottom-0 left-0 right-0">
       {quickActions.map(action => (
         <QuickButton
           key={action.id}

@@ -22,13 +22,13 @@ export function CardStack({ cards, onCardAction }: CardStackProps) {
   }
 
   return (
-    <div className="relative w-full min-h-[500px] max-h-[700px] h-[70vh] sm:h-[600px] md:h-[650px] flex flex-col items-center justify-center">
+    <div className="relative w-full min-h-125 max-h-175 h-[70vh] sm:h-150 md:h-162.5 flex flex-col items-center pt-4">
       {visibleCards.map((card, index) => {
         // Calculer les transformations pour l'effet de stack
         const scale = 1 - index * 0.05 // Chaque carte est légèrement plus petite
         const yOffset = index * 10 // Décalage vertical
         const zIndex = visibleCards.length - index // La première carte au-dessus
-        const opacity = index === 0 ? 1 : 1 - index * 0.15 // Légère transparence pour les cartes du dessous
+        const opacity = index === 0 ? 1 : 1 - index * 0.15 // Légère transparence pour les cartes du dessou
         const rotate = index === 0 ? 0 : (index % 2 === 0 ? 1 : -1) * 0.5 // Légère rotation alternée
 
         return (
@@ -62,7 +62,7 @@ export function CardStack({ cards, onCardAction }: CardStackProps) {
             pointerEvents: 'none',
           }}
         >
-          <div className="w-full min-h-[400px] max-h-[600px] h-[60vh] sm:h-[500px] md:h-[550px] rounded-2xl bg-slate-800/50 border border-slate-700 flex items-center justify-center">
+          <div className="w-full min-h-100 max-h-150 h-[60vh] sm:h-125 md:h-137.5 rounded-2xl bg-slate-800/50 border border-slate-700 flex items-center justify-center">
             <p className="text-slate-400 text-sm font-semibold">
               +{remainingCount} autre{remainingCount > 1 ? 's' : ''}
             </p>

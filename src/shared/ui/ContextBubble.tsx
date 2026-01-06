@@ -47,7 +47,7 @@ export default function ContextBubble({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 mb-2 rounded-xl px-4 py-4 border',
+        'flex items-center gap-2 mb-2 rounded-xl px-2 py-2 border',
         cfg.bg,
         cfg.border
       )}
@@ -58,11 +58,11 @@ export default function ContextBubble({
         <cfg.Icon className={cn('w-5 h-5', cfg.iconText)} />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         <p className={cn('text-[10px] font-bold opacity-80', cfg.text)}>
           CONTEXTE
         </p>
-        <p className={cn('text-sm font-bold', cfg.text)}>{message} Message</p>
+        <p className={cn('text-sm font-bold', cfg.text)}>{message}</p>
       </div>
     </div>
   )
