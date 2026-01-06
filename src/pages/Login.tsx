@@ -80,7 +80,7 @@ export default function Login() {
                     <div className="px-6 py-5">
                         <h2 className="text-white font-extrabold tracking-tight text-xl mb-1">Connexion</h2>
                         <p className="text-slate-400 text-sm font-medium mb-5">
-                            Choisis un fournisseur ou connecte-toi avec ton email.
+                            Choisissez un fournisseur ou connectez-vous avec votre email.
                         </p>
 
                         {/* provider buttons */}
@@ -179,7 +179,7 @@ export default function Login() {
                     {/* footer */}
                     <div className="px-6 py-4 border-t border-white/10">
                         <p className="text-slate-500 text-xs font-medium">
-                            En continuant, tu acceptes nos{' '}
+                            En continuant, vous acceptez nos{' '}
                             <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
                             <span className="text-slate-300 font-bold">politique</span>.
                         </p>

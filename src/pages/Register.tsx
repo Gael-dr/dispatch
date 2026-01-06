@@ -80,7 +80,7 @@ export default function Register() {
                     <div className="px-6 py-5">
                         <h2 className="text-white font-extrabold tracking-tight text-xl mb-1">Inscription</h2>
                         <p className="text-slate-400 text-sm font-medium mb-5">
-                            Crée ton compte avec un fournisseur ou ton email.
+                            Créez votre compte avec un fournisseur ou votre email.
                         </p>
 
                         {/* provider buttons */}
@@ -127,7 +127,7 @@ export default function Register() {
                                     <UserIcon className="w-4 h-4 text-slate-400" />
                                     <input
                                         type="text"
-                                        placeholder="Ton nom"
+                                        placeholder="Nom"
                                         className="w-full bg-transparent outline-none text-white placeholder:text-slate-500 text-sm font-semibold"
                                     />
                                 </div>
@@ -199,7 +199,7 @@ export default function Register() {
                     {/* footer */}
                     <div className="px-6 py-4 border-t border-white/10">
                         <p className="text-slate-500 text-xs font-medium">
-                            En continuant, tu acceptes nos <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
+                            En continuant, vous acceptez nos <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
                             <span className="text-slate-300 font-bold">politique</span>.
                         </p>
                     </div>
