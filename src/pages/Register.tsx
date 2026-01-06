@@ -53,11 +53,11 @@ export default function Register() {
     }
 
     return (
-        <main className="relative h-[100dvh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-8 flex items-start sm:items-center justify-center">
+        <main className="relative h-[100dvh] bg-[#0F172A] w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-8 flex items-start sm:items-center justify-center">
 
 
             {/* card */}
-            <section className="relative w-full max-w-sm">
+            <section className="relative w-full max-w-sm bg-[#1A2435] rounded-3xl">
                 <div className="rounded-3xl border border-white/10 bg-background-secondary/55 shadow-2xl  overflow-hidden">
                     {/* top bar */}
                     <div className="px-6 pt-6 pb-4 border-b border-white/10">

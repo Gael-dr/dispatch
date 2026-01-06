@@ -53,17 +53,17 @@ export default function Login() {
     }
 
     return (
-        <main className="relative h-[100svh] bg-background-secondary w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-8 flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
+        <main className="relative h-[100svh] bg-[#0F172A] w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-8 flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
 
 
             {/* card */}
-            <section className="relative w-full max-w-sm">
+            <section className="relative w-full max-w-sm bg-[#1A2435] rounded-3xl">
                 <div className="rounded-3xl border border-white/10 bg-background-secondary/55 shadow-2xl  overflow-hidden">
                     {/* top bar */}
                     <div className="px-6 pt-6 pb-4 border-b border-white/10">
                         <div className="flex items-center gap-3">
                             <div className="w-11 h-11 rounded-2xl bg-slate-800/50 flex items-center justify-center border border-slate-700 shadow-2xl relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-linear-to-tr from-blue-500/20 to-purple-500/20 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-linear-to-tr from-blue-500/20 to-purple-500/20  group-hover:opacity-100 transition-opacity" />
                                 <LockIcon className="relative w-5 h-5 text-blue-400" />
                             </div>
 
