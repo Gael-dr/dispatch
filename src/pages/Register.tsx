@@ -1,12 +1,13 @@
-import { ChromeIcon, FacebookIcon, LinkedinIcon, LockIcon, MailIcon } from 'lucide-react'
+import { ChromeIcon, FacebookIcon, LinkedinIcon, LockIcon, MailIcon, UserIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 type Provider = 'facebook' | 'linkedin' | 'google'
+type RegisterLoading = Provider | 'email' | null
 
-export default function Login() {
+export default function Register() {
     const navigate = useNavigate()
-    const [loading, setLoading] = useState<Provider | null>(null)
+    const [loading, setLoading] = useState<RegisterLoading>(null)
 
     const providers = useMemo(
         () =>
@@ -38,22 +39,21 @@ export default function Login() {
 
     const handleConnect = (p: Provider) => {
         setLoading(p)
-        // pas de login réel — juste une transition UI + redirection
         window.setTimeout(() => {
             navigate('/')
         }, 250)
     }
 
-    const handleClassicLogin = (e: React.FormEvent) => {
+    const handleClassicRegister = (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading('google')
+        setLoading('email')
         window.setTimeout(() => {
             navigate('/')
         }, 250)
     }
 
     return (
-        <main className="relative h-[100svh] bg-[#0F172A] w-screen overflow-y-auto overflow-x-hidden px-5 py-8 pb-8 flex items-start sm:items-center justify-center bg-background-secondary [-webkit-overflow-scrolling:touch]">
+        <main className="relative h-[100dvh] bg-[#0F172A] w-screen overflow-y-auto overflow-x-hidden px-5 pt-8 pb-8 flex items-start sm:items-center justify-center">
 
 
             {/* card */}
@@ -63,8 +63,8 @@ export default function Login() {
                     <div className="px-6 pt-6 pb-4 border-b border-white/10">
                         <div className="flex items-center gap-3">
                             <div className="w-11 h-11 rounded-2xl bg-slate-800/50 flex items-center justify-center border border-slate-700 shadow-2xl relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-linear-to-tr from-blue-500/20 to-purple-500/20  group-hover:opacity-100 transition-opacity" />
-                                <LockIcon className="relative w-5 h-5 text-blue-400" />
+                                <div className="absolute inset-0 bg-linear-to-tr from-blue-500/20 to-purple-500/20 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <UserIcon className="relative w-5 h-5 text-blue-400" />
                             </div>
 
                             <div className="min-w-0">
@@ -78,9 +78,9 @@ export default function Login() {
 
                     {/* content */}
                     <div className="px-6 py-5">
-                        <h2 className="text-white font-extrabold tracking-tight text-xl mb-1">Connexion</h2>
+                        <h2 className="text-white font-extrabold tracking-tight text-xl mb-1">Inscription</h2>
                         <p className="text-slate-400 text-sm font-medium mb-5">
-                            Choisissez un fournisseur ou connectez-vous avec votre email.
+                            Créez votre compte avec un fournisseur ou votre email.
                         </p>
 
                         {/* provider buttons */}
@@ -90,7 +90,7 @@ export default function Login() {
                                     key={p.id}
                                     onClick={() => handleConnect(p.id)}
                                     disabled={loading !== null}
-                                    className="group relative w-full rounded-2xl border border-white/10 bg-slate-900/30 hover:bg-slate-900/40 active:scale-[0.99] transition-all overflow-hidden"
+                                    className="group relative w-full rounded-2xl border border-white/10 bg-slate-900/30 hover:bg-slate-900/40 active:scale-[0.99] transition-all overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     <div
                                         className={[
@@ -104,13 +104,9 @@ export default function Login() {
                                         </div>
                                         <div className="flex-1 text-left">
                                             <p className="text-white font-bold text-sm tracking-tight">{p.label}</p>
-                                            <p className="text-slate-400 text-xs font-medium">
-                                                Redirection simulée vers “/”
-                                            </p>
+                                            <p className="text-slate-400 text-xs font-medium">Redirection simulée vers “/”</p>
                                         </div>
-                                        <div className="text-slate-500 text-xs font-bold">
-                                            {loading === p.id ? '...' : '→'}
-                                        </div>
+                                        <div className="text-slate-500 text-xs font-bold">{loading === p.id ? '...' : '→'}</div>
                                     </div>
                                 </button>
                             ))}
@@ -124,7 +120,19 @@ export default function Login() {
                         </div>
 
                         {/* email form (design only) */}
-                        <form onSubmit={handleClassicLogin} className="space-y-3">
+                        <form onSubmit={handleClassicRegister} className="space-y-3">
+                            <label className="block">
+                                <span className="text-slate-400 text-xs font-bold tracking-wide">NOM</span>
+                                <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/25 px-4 py-3">
+                                    <UserIcon className="w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Nom"
+                                        className="w-full bg-transparent outline-none text-white placeholder:text-slate-500 text-sm font-semibold"
+                                    />
+                                </div>
+                            </label>
+
                             <label className="block">
                                 <span className="text-slate-400 text-xs font-bold tracking-wide">EMAIL</span>
                                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/25 px-4 py-3">
@@ -149,28 +157,40 @@ export default function Login() {
                                 </div>
                             </label>
 
+                            <label className="block">
+                                <span className="text-slate-400 text-xs font-bold tracking-wide">CONFIRMER</span>
+                                <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/25 px-4 py-3">
+                                    <LockIcon className="w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        className="w-full bg-transparent outline-none text-white placeholder:text-slate-500 text-sm font-semibold"
+                                    />
+                                </div>
+                            </label>
+
                             <button
                                 type="submit"
                                 disabled={loading !== null}
-                                className="relative w-full rounded-2xl bg-blue-500/90 hover:bg-blue-500 text-white font-extrabold tracking-tight py-3.5 shadow-xl shadow-blue-500/15 active:scale-[0.99] transition-all overflow-hidden"
+                                className="relative w-full rounded-2xl bg-blue-500/90 hover:bg-blue-500 text-white font-extrabold tracking-tight py-3.5 shadow-xl shadow-blue-500/15 active:scale-[0.99] transition-all overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <span className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/10 to-white/0 opacity-0 hover:opacity-100 transition-opacity" />
-                                <span className="relative">{loading ? 'Connexion…' : 'Se connecter'}</span>
+                                <span className="relative">{loading ? 'Création…' : "S'inscrire"}</span>
                             </button>
 
                             <div className="flex items-center justify-between pt-1">
                                 <button
                                     type="button"
+                                    onClick={() => navigate('/login')}
                                     className="text-slate-400 hover:text-slate-300 text-xs font-bold tracking-wide"
                                 >
-                                    Mot de passe oublié
+                                    Déjà un compte ?
                                 </button>
                                 <button
                                     type="button"
                                     className="text-slate-400 hover:text-slate-300 text-xs font-bold tracking-wide"
-                                    onClick={() => navigate('/register')}
                                 >
-                                    Créer un compte
+                                    Conditions
                                 </button>
                             </div>
                         </form>
@@ -179,8 +199,7 @@ export default function Login() {
                     {/* footer */}
                     <div className="px-6 py-4 border-t border-white/10">
                         <p className="text-slate-500 text-xs font-medium">
-                            En continuant, vous acceptez nos{' '}
-                            <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
+                            En continuant, vous acceptez nos <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
                             <span className="text-slate-300 font-bold">politique</span>.
                         </p>
                     </div>
