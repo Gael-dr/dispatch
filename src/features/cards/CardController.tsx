@@ -14,7 +14,7 @@ export function CardController({
   children,
 }: CardControllerProps) {
   return (
-    <div className="card-controller flex flex-col gap-4">
+    <div className="card-controller flex flex-col gap-4 px-4">
       <CardView card={card} onAction={onAction} />
       {children}
     </div>

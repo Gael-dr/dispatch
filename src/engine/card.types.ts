@@ -22,6 +22,7 @@ export type CardType = 'calendar' | 'notification'
 export interface Card {
   id: string
   type: CardType
+  status: string
   payload: unknown // Données métier spécifiques au type de card
   actions?: Action[] // Actions disponibles pour cette card
   createdAt: Date

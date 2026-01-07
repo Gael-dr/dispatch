@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { Card } from '../../engine/card.types'
 import { Action, ActionResult } from '../../engine/action.types'
 import { cardExecutor } from '../../engine/card.executor'
+import { Card } from '../../engine/card.types'
 import { generateMockCards } from './mockCards'
 
 export interface CardState {
@@ -21,6 +21,16 @@ export interface CardState {
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
+
+  // Quick Actions
+  markCardDone: (cardId: string) => void
+  skipCard: (cardId: string) => void
+
+  // Computed
+  totalCards: () => number
+  doneCards: () => number
+  pendingCards: () => number
+  progressPercentage: () => number
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
@@ -88,6 +98,65 @@ export const useCardStore = create<CardState>((set, get) => ({
         message: errorMessage,
       }
     }
+  },
+
+  markCardDone: (cardId: string) => {
+    const state = get()
+
+    // Trouver l'index de la carte actuelle avant la mise à jour
+    const currentIndex = state.cards.findIndex(card => card.id === cardId)
+
+    if (currentIndex === -1) {
+      // Carte non trouvée, rien à faire
+      return
+    }
+
+    // Mettre à jour la carte comme "done"
+    state.updateCard(cardId, { status: 'done' })
+
+    // Récupérer l'état mis à jour après la modification
+    const updatedState = get()
+
+    // Trouver la prochaine carte avec le statut "pending" (en excluant celle qu'on vient de marquer)
+    const nextCard = updatedState.cards
+      .slice(currentIndex + 1) // Chercher après la carte actuelle
+      .find(card => card.status === 'pending' && card.id !== cardId)
+
+    // Si aucune carte après, chercher depuis le début (en excluant celle qu'on vient de marquer)
+    const firstPendingCard =
+      nextCard ||
+      updatedState.cards.find(
+        card => card.status === 'pending' && card.id !== cardId
+      )
+
+    // Sélectionner la prochaine carte "pending" (ou null si aucune)
+    updatedState.selectCard(firstPendingCard?.id || null)
+
+    // TODO: appel API backend
+    // const response = await fetch(`/api/cards/${cardId}/mark-done`, {
+    //   method: 'PATCH',
+    //   headers: { 'Content-Type': 'application/json' },
+    // })
+  },
+
+  skipCard: (cardId: string) => {
+    get().updateCard(cardId, { status: 'skipped' })
+    // TODO: appel API backend
+    // const response = await fetch(`/api/cards/${cardId}/skip`, {
+    //   method: 'PATCH',
+    //   headers: { 'Content-Type': 'application/json' },
+    // })
+  },
+
+  totalCards: () => get().cards.length,
+
+  doneCards: () => get().cards.filter(c => c.status === 'done').length,
+
+  pendingCards: () => get().cards.filter(c => c.status === 'pending').length,
+
+  progressPercentage: () => {
+    const total = get().totalCards()
+    return total === 0 ? 0 : Math.round((get().doneCards() / total) * 100)
   },
 
   setLoading: loading => set({ isLoading: loading }),
