@@ -1,11 +1,13 @@
 import { useCardStore } from '@/app/store/cardStore'
 import { CardStack } from '@/features/cards/CardStack'
 import { UserAvatar } from '@/features/user/UserAvatar'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Decisions() {
   const { doneCards, totalCards, progressPercentage, cards, markCardDone } =
     useCardStore()
+  const navigate = useNavigate()
 
   // Calculer les statistiques
   // const stats = useMemo(() => {
@@ -33,6 +35,17 @@ export default function Decisions() {
     () => cards.filter(card => card.status !== 'done'),
     [cards]
   )
+
+  // Rediriger vers le dashboard quand il n'y a plus de cartes
+  useEffect(() => {
+    if (pendingCards.length === 0 && cards.length > 0) {
+      // Attendre un court délai pour laisser l'animation de la dernière carte se terminer
+      const timer = setTimeout(() => {
+        navigate('/dashboard')
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [pendingCards.length, cards.length, navigate])
 
   const handleCardAction = (cardId: string, actionId: string) => {
     console.log(`Action ${actionId} sur la carte ${cardId}`)
