@@ -205,6 +205,10 @@ export function SwipeToUnlock({
           'absolute inset-0 flex items-center justify-center text-xs font-bold uppercase tracking-widest pointer-events-none animate-shimmer pl-10 transition-all duration-900 linear'
         )}
         style={{ opacity: labelOpacity }}
+        initial={{
+          textShadow: '0 0 0px rgba(255, 255, 255, 0)',
+          color: 'rgb(100, 116, 139)',
+        }}
         animate={{
           textShadow: [
             '0 0 0px rgba(255, 255, 255, 0)',

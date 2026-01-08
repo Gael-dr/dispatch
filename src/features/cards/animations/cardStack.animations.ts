@@ -41,6 +41,8 @@ export const EASING_CURVES = {
 export const ANIMATION_DISTANCES = {
   /** Distance horizontale de sortie des cartes (en pixels) */
   exitHorizontal: 400,
+  /** Distance verticale de sortie des cartes (en pixels) */
+  exitVertical: 400,
   /** Décalage vertical initial lors de l'entrée (en pixels) */
   initialYOffset: -15,
   /** Décalage vertical entre les cartes du stack (en pixels) */

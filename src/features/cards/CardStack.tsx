@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { AlertTriangle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Card } from '../../engine/card.types'
 import { CardController } from './CardController'
@@ -19,9 +20,12 @@ export function CardStack({
   // État pour gérer les cartes qui sortent (comme dans l'exemple)
   const [leavingCardId, setLeavingCardId] = useState<string | null>(null)
   const [leavingDirection, setLeavingDirection] = useState<
-    'left' | 'right' | null
+    'left' | 'right' | 'bottom' | null
   >(null)
   const [leavingCard, setLeavingCard] = useState<Card | null>(null)
+  // État pour afficher le tag urgent
+  const [showUrgentTag, setShowUrgentTag] = useState(false)
+  const [urgentTagCardId, setUrgentTagCardId] = useState<string | null>(null)
 
   // Afficher seulement les 3 premières cartes + la carte qui sort
   const visibleCards = useMemo(() => {
@@ -45,23 +49,57 @@ export function CardStack({
   const handleQuickAction = (actionId: string) => {
     if (activeCard && !leavingCardId) {
       // Déterminer la direction de sortie basée sur l'action
-      const direction = activeCard.status === 'quick-done' ? 'left' : 'right'
+      // quick-done = droite, quick-ignore = gauche, quick-defer/quick-urgent = bas, autres = droite
+      let direction: 'left' | 'right' | 'bottom' = 'right'
+      if (actionId === 'quick-done') {
+        direction = 'right'
+      } else if (actionId === 'quick-ignore') {
+        direction = 'left'
+      } else if (actionId === 'quick-defer' || actionId === 'quick-urgent') {
+        direction = 'bottom'
+      }
 
-      // Garder la carte qui sort dans l'état pour qu'elle reste visible pendant l'animation
-      setLeavingCard(activeCard)
-      setLeavingCardId(activeCard.id)
-      setLeavingDirection(direction)
+      // Pour quick-urgent, afficher le tag avant l'animation
+      if (actionId === 'quick-urgent') {
+        setUrgentTagCardId(activeCard.id)
+        setShowUrgentTag(true)
 
-      // Appeler l'action après un court délai pour laisser l'animation se jouer
-      setTimeout(() => {
-        onCardAction?.(activeCard.id, actionId)
-        // Réinitialiser après l'animation (après ~500ms pour laisser le temps à l'animation)
+        // Démarrer l'animation après un délai plus long pour voir le tag
         setTimeout(() => {
-          setLeavingCardId(null)
-          setLeavingDirection(null)
-          setLeavingCard(null)
-        }, 200)
-      }, 300)
+          setLeavingCard(activeCard)
+          setLeavingCardId(activeCard.id)
+          setLeavingDirection(direction)
+          setShowUrgentTag(false)
+
+          // Appeler l'action après un délai pour laisser l'animation se jouer
+          setTimeout(() => {
+            onCardAction?.(activeCard.id, actionId)
+            // Réinitialiser après l'animation
+            setTimeout(() => {
+              setLeavingCardId(null)
+              setLeavingDirection(null)
+              setLeavingCard(null)
+              setUrgentTagCardId(null)
+            }, 500)
+          }, 500)
+        }, 800) // Délai pour voir le tag (augmenté de 200ms à 800ms)
+      } else {
+        // Pour les autres actions, animation immédiate
+        setLeavingCard(activeCard)
+        setLeavingCardId(activeCard.id)
+        setLeavingDirection(direction)
+
+        // Appeler l'action après un court délai pour laisser l'animation se jouer
+        setTimeout(() => {
+          onCardAction?.(activeCard.id, actionId)
+          // Réinitialiser après l'animation (après ~500ms pour laisser le temps à l'animation)
+          setTimeout(() => {
+            setLeavingCardId(null)
+            setLeavingDirection(null)
+            setLeavingCard(null)
+          }, 200)
+        }, 300)
+      }
     }
   }
 
@@ -95,16 +133,26 @@ export function CardStack({
             }}
             animate={
               isLeaving
-                ? {
-                    x:
-                      leavingDirection === 'left'
-                        ? -ANIMATION_DISTANCES.exitHorizontal
-                        : ANIMATION_DISTANCES.exitHorizontal,
-                    rotate: leavingDirection === 'left' ? -25 : 25,
-                    opacity: 0,
-                    scale: 0.8,
-                    filter: 'blur(4px)',
-                  }
+                ? leavingDirection === 'bottom'
+                  ? {
+                      // Animation vers le bas
+                      y: ANIMATION_DISTANCES.exitVertical,
+                      rotate: 0,
+                      opacity: 0,
+                      scale: 0.8,
+                      filter: 'blur(4px)',
+                    }
+                  : {
+                      // Animation vers la gauche ou droite
+                      x:
+                        leavingDirection === 'left'
+                          ? -ANIMATION_DISTANCES.exitHorizontal
+                          : ANIMATION_DISTANCES.exitHorizontal,
+                      rotate: leavingDirection === 'left' ? -25 : 25,
+                      opacity: 0,
+                      scale: 0.8,
+                      filter: 'blur(4px)',
+                    }
                 : {
                     scale: 1 - displayIndex * STACK_PROPERTIES.scaleReduction,
                     y: displayIndex * ANIMATION_DISTANCES.stackYOffset,
@@ -134,16 +182,26 @@ export function CardStack({
                       duration: 0.3,
                       ease: [0.4, 0, 0.2, 1],
                     },
-                    x: {
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 25,
-                    },
-                    rotate: {
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 25,
-                    },
+                    ...(leavingDirection === 'bottom'
+                      ? {
+                          y: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                        }
+                      : {
+                          x: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                          rotate: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                        }),
                     scale: {
                       type: 'spring',
                       stiffness: 300,
@@ -176,18 +234,52 @@ export function CardStack({
                     }
             }
           >
-            {isTop || isLeaving ? (
-              <CardController
-                card={card}
-                onAction={actionId => onCardAction?.(card.id, actionId)}
-              />
-            ) : (
-              // Pour les cartes non visibles, rendre seulement le contour pour l'effet visuel
-              // Ajouter le même padding que CardController (px-4) pour avoir la même largeur effective
-              <div className="px-4">
-                <div className="w-full min-h-100 max-h-150 h-[60vh] sm:h-125 md:h-137.5 rounded-2xl bg-slate-800/50 border border-slate-700" />
-              </div>
-            )}
+            <div className="relative w-full h-full">
+              {isTop || isLeaving ? (
+                <CardController
+                  card={card}
+                  onAction={actionId => onCardAction?.(card.id, actionId)}
+                />
+              ) : (
+                // Pour les cartes non visibles, rendre seulement le contour pour l'effet visuel
+                // Ajouter le même padding que CardController (px-4) pour avoir la même largeur effective
+                <div className="px-4">
+                  <div className="w-full min-h-100 max-h-150 h-[60vh] sm:h-125 md:h-137.5 rounded-2xl bg-slate-800/50 border border-slate-700" />
+                </div>
+              )}
+
+              {/* Backdrop blur pour la carte quand le tag urgent est visible */}
+              {showUrgentTag && urgentTagCardId === card.id && isTop && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-0 backdrop-blur-[2px] rounded-2xl z-40"
+                  style={{ pointerEvents: 'none' }}
+                />
+              )}
+
+              {/* Tag Urgent */}
+              {showUrgentTag && urgentTagCardId === card.id && isTop && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 25,
+                  }}
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 z-50"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  <div className="bg-red-700 text-white px-4 py-2 rounded-xl shadow-lg font-extrabold text-sm uppercase tracking-wider border border-red-500 flex items-center gap-2">
+                    Urgent <AlertTriangle className="w-4 h-4" />
+                  </div>
+                </motion.div>
+              )}
+            </div>
           </motion.div>
         )
       })}
