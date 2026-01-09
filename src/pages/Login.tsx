@@ -182,16 +182,16 @@ export default function Login() {
                         </form>
                     </div>
 
-                  {/* footer */}
-                  <div className="px-6 py-4 border-t border-white/10">
-                      <p className="text-slate-500 text-xs font-medium">
-                          En continuant, vous acceptez nos{' '}
-                          <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
-                          <span className="text-slate-300 font-bold">politique</span>.
-                      </p>
-                  </div>
-                </div>
-          </section>
-      </main>
+              {/* footer */}
+              <div className="px-6 py-4 border-t border-white/10">
+                  <p className="text-slate-500 text-xs font-medium">
+                      En continuant, vous acceptez nos{' '}
+                      <span className="text-slate-300 font-bold">conditions</span> et notre{' '}
+                      <span className="text-slate-300 font-bold">politique</span>.
+                  </p>
+              </div>
+          </div>
+      </section>
+    </main>
   )
 }

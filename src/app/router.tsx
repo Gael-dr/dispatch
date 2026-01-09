@@ -5,8 +5,12 @@ import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import Settings from '@/pages/Settings'
 import { createBrowserRouter } from 'react-router-dom'
+import { AppLayout } from './AppLayout'
 
 export const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
   {
     path: '/',
     element: <Home />,
@@ -30,5 +34,7 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <Register />,
+      },
+    ],
   },
 ])

@@ -54,6 +54,7 @@ export function generateMockCards(count: number = 9): Card[] {
         id: `calendar-${i}`,
         type: 'calendar',
         payload,
+        status: 'pending',
         // actions optionnel : si non défini, la policy les fournira
         createdAt: new Date(now.getTime() - i * 60000),
         updatedAt: new Date(now.getTime() - i * 60000),
@@ -84,6 +85,7 @@ export function generateMockCards(count: number = 9): Card[] {
         id: `notification-${i}`,
         type: 'notification',
         payload,
+        status: 'pending',
         // Les actions viendront de la policy (mark-read, dismiss)
         createdAt: new Date(now.getTime() - i * 60000),
         updatedAt: new Date(now.getTime() - i * 60000),
@@ -116,6 +118,7 @@ export function convertLegacyCard(legacyCard: LegacyCard): Card {
     id: legacyCard.id,
     type: legacyCard.type as Card['type'],
     payload,
+    status: 'pending',
     createdAt: legacyCard.createdAt,
     updatedAt: legacyCard.updatedAt,
   }
