@@ -1,4 +1,5 @@
 import type { Card } from '@/engine/cards/card.types'
+import { cardFactory } from '@/engine/cards/factory'
 
 export type UiButtonType = 'primary' | 'secondary' | 'destructive'
 
@@ -47,31 +48,46 @@ export function getButtonTypeForAction(actionType: UiActionType): UiButtonType {
  */
 export function getQuickActions(): UiAction[] {
   return [
-    { id: 'quick-defer', type: 'defer', label: 'PLUS TARD', requiresConfirmation: false },
-    { id: 'quick-urgent', type: 'mark-urgent', label: 'URGENT', requiresConfirmation: false },
-    { id: 'quick-done', type: 'mark-done', label: 'FAIT', requiresConfirmation: false },
-    { id: 'quick-ignore', type: 'ignore', label: 'IGNORER', requiresConfirmation: false },
+    {
+      id: 'quick-defer',
+      type: 'defer',
+      label: 'PLUS TARD',
+      requiresConfirmation: false,
+    },
+    {
+      id: 'quick-urgent',
+      type: 'mark-urgent',
+      label: 'URGENT',
+      requiresConfirmation: false,
+    },
+    {
+      id: 'quick-done',
+      type: 'mark-done',
+      label: 'FAIT',
+      requiresConfirmation: false,
+    },
+    {
+      id: 'quick-ignore',
+      type: 'ignore',
+      label: 'IGNORER',
+      requiresConfirmation: false,
+    },
   ]
 }
 
 /**
- * Actions disponibles par défaut selon le type de card (types connus).
- * Pour les nouveaux types (string), renvoie [].
+ * Récupère les actions disponibles pour une carte.
+ * Les actions sont maintenant définies dans le blueprint de chaque type de carte.
+ *
+ * @param card - La carte pour laquelle récupérer les actions
+ * @returns Un tableau d'actions disponibles, ou un tableau vide si aucune action n'est définie
  */
-const DEFAULT_ACTIONS_BY_TYPE: Record<'calendar' | 'notification', UiAction[]> = {
-  calendar: [
-    { id: 'accept', type: 'approve', label: 'Accepter', icon: 'Check', requiresConfirmation: false },
-    { id: 'schedule', type: 'schedule', label: 'Proposer un Créneau', icon: 'Calendar', requiresConfirmation: false },
-    { id: 'reject', type: 'reject', label: 'Refuser', icon: 'X', requiresConfirmation: false },
-  ],
-  notification: [
-    { id: 'mark-read', type: 'archive', label: 'Marquer comme lu', requiresConfirmation: false },
-    { id: 'dismiss', type: 'archive', label: 'Ignorer', requiresConfirmation: false },
-  ],
-}
-
 export function getAvailableActions(card: Card): UiAction[] {
-  if (card.type === 'calendar') return DEFAULT_ACTIONS_BY_TYPE.calendar
-  if (card.type === 'notification') return DEFAULT_ACTIONS_BY_TYPE.notification
+  const blueprint = cardFactory.getBlueprint(card.type)
+
+  if (blueprint?.actions) {
+    return blueprint.actions(card)
+  }
+
   return []
 }

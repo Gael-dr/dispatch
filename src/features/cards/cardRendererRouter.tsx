@@ -1,7 +1,10 @@
 import type { Card } from '@/engine/cards/card.types'
 import { getCardRendererFor } from './CardRenderers.registry'
 
-export function getCardRenderer(card: Card, onAction?: (actionId: string) => void) {
+export function getCardRenderer(
+  card: Card,
+  onAction?: (actionId: string) => void
+) {
   const Renderer = getCardRendererFor(card.type)
   if (Renderer) return <Renderer card={card} onAction={onAction} />
 

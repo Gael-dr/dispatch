@@ -135,103 +135,103 @@ export function CardStack({
               isLeaving
                 ? leavingDirection === 'bottom'
                   ? {
-                    // Animation vers le bas
-                    y: ANIMATION_DISTANCES.exitVertical,
-                    rotate: 0,
-                    opacity: 0,
-                    scale: 0.8,
-                    filter: 'blur(4px)',
-                  }
+                      // Animation vers le bas
+                      y: ANIMATION_DISTANCES.exitVertical,
+                      rotate: 0,
+                      opacity: 0,
+                      scale: 0.8,
+                      filter: 'blur(4px)',
+                    }
                   : {
-                    // Animation vers la gauche ou droite
-                    x:
-                      leavingDirection === 'left'
-                        ? -ANIMATION_DISTANCES.exitHorizontal
-                        : ANIMATION_DISTANCES.exitHorizontal,
-                    rotate: leavingDirection === 'left' ? -25 : 25,
-                    opacity: 0,
-                    scale: 0.8,
-                    filter: 'blur(4px)',
-                  }
+                      // Animation vers la gauche ou droite
+                      x:
+                        leavingDirection === 'left'
+                          ? -ANIMATION_DISTANCES.exitHorizontal
+                          : ANIMATION_DISTANCES.exitHorizontal,
+                      rotate: leavingDirection === 'left' ? -25 : 25,
+                      opacity: 0,
+                      scale: 0.8,
+                      filter: 'blur(4px)',
+                    }
                 : {
-                  scale: 1 - displayIndex * STACK_PROPERTIES.scaleReduction,
-                  y: displayIndex * ANIMATION_DISTANCES.stackYOffset,
-                  x: 0,
-                  rotate: 0,
-                  opacity:
-                    displayIndex === 0
-                      ? 1
-                      : 1 - displayIndex * STACK_PROPERTIES.opacityReduction,
-                  filter: 'blur(0px)',
-                }
+                    scale: 1 - displayIndex * STACK_PROPERTIES.scaleReduction,
+                    y: displayIndex * ANIMATION_DISTANCES.stackYOffset,
+                    x: 0,
+                    rotate: 0,
+                    opacity:
+                      displayIndex === 0
+                        ? 1
+                        : 1 - displayIndex * STACK_PROPERTIES.opacityReduction,
+                    filter: 'blur(0px)',
+                  }
             }
             transition={
               isLeaving
                 ? {
-                  // Transition pour l'animation exit
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 25,
-                  opacity: {
-                    delay: 0.1,
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1],
-                  },
-                  filter: {
-                    delay: 0.02,
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1],
-                  },
-                  ...(leavingDirection === 'bottom'
-                    ? {
-                      y: {
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 25,
-                      },
-                    }
-                    : {
-                      x: {
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 25,
-                      },
-                      rotate: {
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 25,
-                      },
-                    }),
-                  scale: {
+                    // Transition pour l'animation exit
                     type: 'spring',
                     stiffness: 300,
                     damping: 25,
-                  },
-                }
+                    opacity: {
+                      delay: 0.1,
+                      duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1],
+                    },
+                    filter: {
+                      delay: 0.02,
+                      duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1],
+                    },
+                    ...(leavingDirection === 'bottom'
+                      ? {
+                          y: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                        }
+                      : {
+                          x: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                          rotate: {
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          },
+                        }),
+                    scale: {
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 25,
+                    },
+                  }
                 : leavingCardId && !isLeaving
                   ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 35,
-                    delay: isTop ? STACK_PROPERTIES.nextCardDelay : 0,
-                    layout: {
                       type: 'spring',
-                      stiffness: 1000,
-                      damping: 60,
+                      stiffness: 400,
+                      damping: 35,
                       delay: isTop ? STACK_PROPERTIES.nextCardDelay : 0,
-                    },
-                  }
+                      layout: {
+                        type: 'spring',
+                        stiffness: 1000,
+                        damping: 60,
+                        delay: isTop ? STACK_PROPERTIES.nextCardDelay : 0,
+                      },
+                    }
                   : {
-                    // Transition normale
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                    layout: {
+                      // Transition normale
                       type: 'spring',
-                      stiffness: 800,
-                      damping: 50,
-                    },
-                  }
+                      stiffness: 300,
+                      damping: 25,
+                      layout: {
+                        type: 'spring',
+                        stiffness: 800,
+                        damping: 50,
+                      },
+                    }
             }
           >
             <div className="relative w-full h-full">
@@ -289,8 +289,9 @@ export function CardStack({
         <motion.div
           className="absolute w-full flex items-center justify-center"
           style={{
-            transform: `translateY(${visibleCards.length * 10}px) scale(${1 - visibleCards.length * STACK_PROPERTIES.scaleReduction
-              })`,
+            transform: `translateY(${visibleCards.length * 10}px) scale(${
+              1 - visibleCards.length * STACK_PROPERTIES.scaleReduction
+            })`,
             zIndex: 0,
             pointerEvents: 'none',
           }}

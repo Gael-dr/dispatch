@@ -68,9 +68,6 @@ export function getExitAnimation(exitDirection: number) {
   const rotation =
     exitDirection < 0 ? -EXIT_ANIMATION.rotation : EXIT_ANIMATION.rotation
 
-  // Distance de sortie (utiliser la valeur absolue)
-  const exitDistance = Math.abs(exitDirection)
-
   return {
     // Translation horizontale avec la direction
     x: exitDirection,

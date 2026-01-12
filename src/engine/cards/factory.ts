@@ -1,7 +1,9 @@
-import { CardFactory } from './CardFactory'
-import { calendarBlueprint } from '@/features/calendar/calendar.card.blueprint'
-import { notificationBlueprint } from '@/features/notification/notification.card.blueprint'
+import { CardFactory } from './cardFactory'
 
+/**
+ * Instance singleton du CardFactory.
+ *
+ * Les blueprints sont maintenant enregistrés via `registerCard()` dans chaque feature.
+ * Voir les fichiers `register.ts` dans chaque dossier de feature.
+ */
 export const cardFactory = new CardFactory()
-    .register(calendarBlueprint)
-    .register(notificationBlueprint)

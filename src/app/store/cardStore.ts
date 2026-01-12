@@ -43,13 +43,16 @@ export const useCardStore = create<CardState>((set, get) => ({
   removeCard: cardId =>
     set(state => ({
       cards: state.cards.filter(card => card.id !== cardId),
-      selectedCardId: state.selectedCardId === cardId ? null : state.selectedCardId,
+      selectedCardId:
+        state.selectedCardId === cardId ? null : state.selectedCardId,
     })),
 
   updateCard: (cardId, updates) =>
     set(state => ({
       cards: state.cards.map(card =>
-        card.id === cardId ? { ...card, ...updates, updatedAt: new Date() } : card,
+        card.id === cardId
+          ? { ...card, ...updates, updatedAt: new Date() }
+          : card
       ),
     })),
 
