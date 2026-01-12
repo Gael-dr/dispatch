@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react'
 import { useKeyboard } from '../../../shared/hooks/useKeyboard'
-import { Card } from '../../../engine/card.types'
+import { Card } from '../../../engine/cards/card.types'
 
 interface DesktopInteractionsProps {
   card: Card
