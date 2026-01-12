@@ -1,21 +1,17 @@
-import { Card } from '../cards/card.types'
+import type { CardTypeId } from './card.types'
+import type { CardBlueprint } from './cards.blueprint'
 
-type CardHandler = (card: Card) => void
+// registry métier
+const BLUEPRINTS: Partial<Record<CardTypeId, CardBlueprint<any>>> = {}
 
-class CardRegistry {
-  private handlers: Map<string, CardHandler> = new Map()
-
-  register(type: string, handler: CardHandler) {
-    this.handlers.set(type, handler)
-  }
-
-  get(type: string): CardHandler | undefined {
-    return this.handlers.get(type)
-  }
-
-  has(type: string): boolean {
-    return this.handlers.has(type)
-  }
+export function registerCardType<T>(bp: CardBlueprint<T>) {
+  BLUEPRINTS[bp.type] = bp
 }
 
-export const cardRegistry = new CardRegistry()
+export function getBlueprint(type: CardTypeId) {
+  return BLUEPRINTS[type]
+}
+
+export function listCardTypes() {
+  return Object.keys(BLUEPRINTS)
+}
