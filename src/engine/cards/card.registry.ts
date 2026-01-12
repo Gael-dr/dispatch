@@ -1,4 +1,4 @@
-import { Card } from './card.types'
+import { Card } from '../cards/card.types'
 
 type CardHandler = (card: Card) => void
 

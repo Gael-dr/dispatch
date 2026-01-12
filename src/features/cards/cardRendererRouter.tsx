@@ -1,17 +1,8 @@
-// Router de renderers - Sélectionne le bon renderer selon le type de card
-// Fichier séparé pour respecter Fast Refresh (pas de mélange composants/fonctions)
-
-import { CalendarPayload, NotificationPayload } from '@/engine/card.payloads'
-import { Card } from '@/engine/card.types'
+import type { CalendarPayload, NotificationPayload } from '@/engine/cards/card.payloads'
+import type { Card } from '@/engine/cards/card.types' // ✅ ici
 import { CalendarCardRenderer, NotificationCardRenderer } from './cardRenderers'
 
-/**
- * Router de renderers - Sélectionne le bon renderer selon le type de card
- */
-export function getCardRenderer(
-  card: Card,
-  onAction?: (actionId: string) => void
-) {
+export function getCardRenderer(card: Card, onAction?: (actionId: string) => void) {
   switch (card.type) {
     case 'calendar':
       return (
@@ -30,7 +21,6 @@ export function getCardRenderer(
         />
       )
     default: {
-      // Fallback pour les types inconnus
       const payload = card.payload as Record<string, unknown>
       return (
         <div className="w-full h-125 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col p-6">

@@ -2,8 +2,8 @@
 // ❌ Pas de logique métier, pas d'API
 // ✅ Rendu pur basé sur le payload
 
-import { CalendarPayload, NotificationPayload } from '@/engine/card.payloads'
-import { Card } from '@/engine/card.types'
+import { CalendarPayload, NotificationPayload } from '@/engine/cards/card.payloads'
+import { Card } from '@/engine/cards/card.types'
 import { getAvailableActions } from '@/engine/policies/card.policy'
 import ContextBubble from '@/shared/ui/ContextBubble'
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
@@ -36,9 +36,9 @@ export function CalendarCardRenderer({
           source={
             payload.source
               ? {
-                  type: payload.source.type,
-                  label: payload.source.label,
-                }
+                type: payload.source.type,
+                label: payload.source.label,
+              }
               : undefined
           }
           timestamp={payload.startDate}
@@ -120,9 +120,9 @@ export function NotificationCardRenderer({
           source={
             payload.source
               ? {
-                  type: payload.source.type,
-                  label: payload.source.label,
-                }
+                type: payload.source.type,
+                label: payload.source.label,
+              }
               : undefined
           }
           timestamp={payload.timestamp}

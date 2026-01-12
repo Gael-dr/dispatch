@@ -1,17 +1,31 @@
-// Card policy - Détermine les règles produit pour les cards
-// ❌ Aucune dépendance à React, DOM, ou UI
+import type { Card } from '@/engine/cards/card.types'
 
-import { Action } from '../action.types'
-import { Card } from '../card.types'
+export type UiButtonType = 'primary' | 'secondary' | 'destructive'
+
+export type UiActionType =
+  | 'approve'
+  | 'reject'
+  | 'defer'
+  | 'archive'
+  | 'schedule'
+  | 'read'
+  | 'mark-urgent'
+  | 'mark-done'
+  | 'ignore'
+  | 'custom'
+
+export type UiAction = {
+  id: string
+  type: UiActionType
+  label: string
+  requiresConfirmation?: boolean
+  icon?: string
+}
 
 /**
- * Mapping centralisé : type d'action métier → type de bouton UI
- * 📝 Un seul endroit pour modifier tous les mappings
+ * Mapping centralisé : action → style de bouton
  */
-const ACTION_TO_BUTTON_TYPE: Record<
-  Action['type'],
-  'primary' | 'secondary' | 'destructive'
-> = {
+const ACTION_TO_BUTTON_TYPE: Record<UiActionType, UiButtonType> = {
   approve: 'primary',
   reject: 'destructive',
   defer: 'secondary',
@@ -24,95 +38,40 @@ const ACTION_TO_BUTTON_TYPE: Record<
   custom: 'secondary',
 }
 
+export function getButtonTypeForAction(actionType: UiActionType): UiButtonType {
+  return ACTION_TO_BUTTON_TYPE[actionType] || 'secondary'
+}
+
 /**
- * Actions rapides globales - Toujours les mêmes pour toutes les cards
+ * Actions rapides globales
  */
-export function getQuickActions(): Action[] {
+export function getQuickActions(): UiAction[] {
   return [
-    {
-      id: 'quick-defer',
-      type: 'defer',
-      label: 'PLUS TARD',
-      requiresConfirmation: false,
-    },
-    {
-      id: 'quick-urgent',
-      type: 'mark-urgent',
-      label: 'URGENT',
-      requiresConfirmation: false,
-    },
-    {
-      id: 'quick-done',
-      type: 'mark-done',
-      label: 'FAIT',
-      requiresConfirmation: false,
-    },
-    {
-      id: 'quick-ignore',
-      type: 'ignore',
-      label: 'IGNORER',
-      requiresConfirmation: false,
-    }
+    { id: 'quick-defer', type: 'defer', label: 'PLUS TARD', requiresConfirmation: false },
+    { id: 'quick-urgent', type: 'mark-urgent', label: 'URGENT', requiresConfirmation: false },
+    { id: 'quick-done', type: 'mark-done', label: 'FAIT', requiresConfirmation: false },
+    { id: 'quick-ignore', type: 'ignore', label: 'IGNORER', requiresConfirmation: false },
   ]
 }
 
 /**
- * Récupère les actions disponibles pour une card selon son type
+ * Actions disponibles par défaut selon le type de card (types connus).
+ * Pour les nouveaux types (string), renvoie [].
  */
-export function getAvailableActions(card: Card): Action[] {
-  if ('actions' in card && Array.isArray(card.actions)) {
-    return card.actions as Action[]
-  }
-
-  // Actions par défaut selon le type de card
-  const defaultActions: Record<Card['type'], Action[]> = {
-    calendar: [
-      {
-        id: 'accept',
-        type: 'approve',
-        label: 'Accepter',
-        icon: 'Check',
-        requiresConfirmation: false,
-      },
-      {
-        id: 'schedule',
-        type: 'schedule',
-        label: 'Proposer un Créneau',
-        icon: 'Calendar',
-        requiresConfirmation: false,
-      },
-      {
-        id: 'reject',
-        type: 'reject',
-        label: 'Refuser',
-        icon: 'X',
-        requiresConfirmation: false,
-      },
-    ],
-    notification: [
-      {
-        id: 'mark-read',
-        type: 'archive',
-        label: 'Marquer comme lu',
-        requiresConfirmation: false,
-      },
-      {
-        id: 'dismiss',
-        type: 'archive',
-        label: 'Ignorer',
-        requiresConfirmation: false,
-      },
-    ],
-  }
-
-  return defaultActions[card.type] || []
+const DEFAULT_ACTIONS_BY_TYPE: Record<'calendar' | 'notification', UiAction[]> = {
+  calendar: [
+    { id: 'accept', type: 'approve', label: 'Accepter', icon: 'Check', requiresConfirmation: false },
+    { id: 'schedule', type: 'schedule', label: 'Proposer un Créneau', icon: 'Calendar', requiresConfirmation: false },
+    { id: 'reject', type: 'reject', label: 'Refuser', icon: 'X', requiresConfirmation: false },
+  ],
+  notification: [
+    { id: 'mark-read', type: 'archive', label: 'Marquer comme lu', requiresConfirmation: false },
+    { id: 'dismiss', type: 'archive', label: 'Ignorer', requiresConfirmation: false },
+  ],
 }
 
-/**
- * Mappe un type d'action vers un type de bouton UI
- */
-export function getButtonTypeForAction(
-  actionType: Action['type']
-): 'primary' | 'secondary' | 'destructive' {
-  return ACTION_TO_BUTTON_TYPE[actionType] || 'secondary'
+export function getAvailableActions(card: Card): UiAction[] {
+  if (card.type === 'calendar') return DEFAULT_ACTIONS_BY_TYPE.calendar
+  if (card.type === 'notification') return DEFAULT_ACTIONS_BY_TYPE.notification
+  return []
 }
