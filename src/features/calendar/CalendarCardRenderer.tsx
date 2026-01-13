@@ -1,8 +1,8 @@
-import type { Card } from '@/engine/cards/card.types'
 import type { CalendarPayload } from '@/engine/cards/card.payloads'
-import ContextBubble from '@/shared/ui/ContextBubble'
+import type { Card } from '@/engine/cards/card.types'
 import { CardHeader } from '@/features/cards/CardHeader'
 import { CardShell } from '@/features/cards/CardShell'
+import ContextBubble from '@/shared/ui/ContextBubble'
 
 export function CalendarCardRenderer({
   card,
