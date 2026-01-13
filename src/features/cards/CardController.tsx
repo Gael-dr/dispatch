@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Card } from '../../engine/card.types'
+import { Card } from '../../engine/cards/card.types'
 import { CardView } from './CardView'
 
 interface CardControllerProps {

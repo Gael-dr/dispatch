@@ -1,13 +1,13 @@
 // Actions principales des cards - Composant dédié aux actions spécifiques à chaque card
 import { ComponentProps } from 'react'
-import { Action } from '../../engine/action.types'
+import type { UiAction } from '../../engine/policies/card.policy'
 import { getButtonTypeForAction } from '../../engine/policies/card.policy'
 import { ActionBar } from '../../shared/ui/ActionBar'
 import { ActionButton } from '../../shared/ui/ActionButton'
 import { Icon } from '../../shared/ui/Icon'
 
 interface CardActionsProps {
-  actions: Action[]
+  actions: UiAction[]
   onAction?: (actionId: string) => void
 }
 

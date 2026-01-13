@@ -1,3 +1,6 @@
+import '@/features/notification/register'
+import '@/features/calendar/register'
+
 import { ReactNode } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'

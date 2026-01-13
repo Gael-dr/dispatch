@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Card } from '../../engine/card.types'
+import { Card } from '../../engine/cards/card.types'
 import { CardController } from './CardController'
 import { QuickActions } from './QuickActions'
 import { ANIMATION_DISTANCES, STACK_PROPERTIES } from './animations'

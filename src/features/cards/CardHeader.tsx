@@ -3,11 +3,7 @@
 
 import { cn } from '@/lib/utils'
 import { Eye, Linkedin, Mail, Settings, Slack } from 'lucide-react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
 
 export interface CardHeaderSource {
   type: 'gmail' | 'linkedin' | 'direct' | 'calendar' | 'custom' | 'slack'

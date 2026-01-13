@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { useSwipe } from '../../../shared/hooks/useSwipe'
 import { useHaptics } from '../../../shared/hooks/useHaptics'
-import { Card } from '../../../engine/card.types'
+import { Card } from '../../../engine/cards/card.types'
 
 interface MobileInteractionsProps {
   card: Card

@@ -2,7 +2,7 @@
 // ❌ Pas d'API, pas de logique métier, pas de condition device
 // ✅ Affiche uniquement le payload de la card via les renderers spécifiques
 
-import { Card } from '../../engine/card.types'
+import { Card } from '../../engine/cards/card.types'
 import { getCardRenderer } from './cardRendererRouter'
 
 interface CardViewProps {

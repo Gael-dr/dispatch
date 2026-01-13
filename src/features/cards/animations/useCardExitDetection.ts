@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { Card } from '../../../engine/card.types'
+import { Card } from '../../../engine/cards/card.types'
 import { ANIMATION_DISTANCES } from './cardStack.animations'
 
 /**

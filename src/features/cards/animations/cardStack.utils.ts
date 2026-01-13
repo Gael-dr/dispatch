@@ -1,4 +1,4 @@
-import { Card } from '../../../engine/card.types'
+import { Card } from '../../../engine/cards/card.types'
 import {
   ENTRY_ANIMATION,
   EXIT_ANIMATION,
@@ -67,9 +67,6 @@ export function getExitAnimation(exitDirection: number) {
   // Rotation prononcée pour l'effet Tinder
   const rotation =
     exitDirection < 0 ? -EXIT_ANIMATION.rotation : EXIT_ANIMATION.rotation
-
-  // Distance de sortie (utiliser la valeur absolue)
-  const exitDistance = Math.abs(exitDirection)
 
   return {
     // Translation horizontale avec la direction
