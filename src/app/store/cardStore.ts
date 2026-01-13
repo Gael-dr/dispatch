@@ -1,6 +1,6 @@
 import type { Card } from '@/engine/cards/card.types'
 import { createCardsFromApiData } from '@/engine/cards/card.utils'
-import { fetchCardsFromBackend } from '@/features/cards/cards.api'
+import { fetchCardsFromBackend } from '@/features/cards/api/cards.api'
 import { create } from 'zustand'
 import { generateMockCards } from './mockCards'
 

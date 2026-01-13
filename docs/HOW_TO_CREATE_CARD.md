@@ -271,17 +271,15 @@ export function MaCarteRenderer({
 
 **Composants disponibles** :
 
-1. **`CardShell`** : Enveloppe principale de la carte
+1. <b>`CardShell`</b> : Enveloppe principale de la carte
    - Gère automatiquement le layout, les actions, le responsive
    - Accepte `header`, `children`, et `onAction`
    - Propriété `footerClassName` pour personnaliser le footer
-
-2. **`CardHeader`** : Header réutilisable avec avatar, nom, source
+2. <b>`CardHeader`</b> : Header réutilisable avec avatar, nom, source
    - Affiche automatiquement les icônes selon le type de source
    - Supporte `showTopBorder` pour une bordure colorée en haut
    - Gère le timestamp et les actions (voir, paramètres)
-
-3. **`ContextBubble`** : Bulle contextuelle pour messages importants
+3. <b>`ContextBubble`</b> : Bulle contextuelle pour messages importants
    - Supporte différents niveaux de sévérité (`severity`)
    - Affiche un message optionnel
 
@@ -356,7 +354,7 @@ registerCard(maCarteBlueprint, MaCarteRenderer)
 export {}
 ```
 
-**Avantages du helper `registerCard()`** :
+<b>Avantages du helper `registerCard()`</b> :
 
 - ✅ Plus simple : une seule fonction au lieu de deux
 - ✅ Type-safe : le type est automatiquement extrait du blueprint
@@ -423,6 +421,70 @@ Les actions sont automatiquement récupérées par `getAvailableActions()` et af
 
 **Note** : Si vous ne définissez pas d'actions, un tableau vide sera retourné par défaut.
 
+### Fusion des actions : Backend + Blueprint
+
+**Le système fusionne automatiquement les actions venant de deux sources** :
+
+1. **Actions du backend** : Définies dans la réponse API pour chaque carte spécifique
+2. **Actions du blueprint** : Définies dans le blueprint comme actions par défaut pour le type de carte
+
+#### Stratégie de fusion
+
+- **Priorité** : Les actions du backend ont **priorité** sur celles du blueprint
+- **Déduplication** : Si deux actions ont le même `id`, celle du backend est conservée
+- **Complémentarité** : Les actions du blueprint sont ajoutées si elles n'existent pas déjà
+
+**Fonction de fusion** : `mergeActions(backendActions, blueprintActions)` dans `card.policy.ts`
+
+#### Scénarios d'utilisation
+
+**Scénario 1 : Actions uniquement du blueprint**
+
+```typescript
+// Backend ne fournit pas d'actions
+card = { ...données backend, actions: undefined }
+blueprint.actions = [{ id: 'accept', ... }, { id: 'reject', ... }]
+// → Résultat: [accept, reject] (uniquement depuis le blueprint)
+```
+
+**Scénario 2 : Actions uniquement du backend**
+
+```typescript
+// Backend fournit des actions, blueprint n'en a pas
+card = { ...données backend, actions: [{ id: 'custom-action', ... }] }
+blueprint.actions = undefined
+// → Résultat: [custom-action] (uniquement depuis le backend)
+```
+
+**Scénario 3 : Fusion des deux sources (recommandé)**
+
+```typescript
+// Backend fournit des actions spécifiques, blueprint définit les actions par défaut
+card = {
+  ...données backend,
+  actions: [
+    { id: 'accept', type: 'approve', label: 'Accepter (Backend)' },
+    { id: 'custom', type: 'custom', label: 'Action personnalisée' }
+  ]
+}
+blueprint.actions = () => [
+  { id: 'accept', type: 'approve', label: 'Accepter' },
+  { id: 'reject', type: 'reject', label: 'Refuser' }
+]
+// → Résultat: [
+//     { id: 'accept', ... } depuis backend (priorité),
+//     { id: 'custom', ... } depuis backend,
+//     { id: 'reject', ... } depuis blueprint (pas de conflit)
+//   ]
+```
+
+#### Avantages de cette approche
+
+- ✅ **Flexibilité** : Le backend peut personnaliser les actions par carte
+- ✅ **Fallback** : Si le backend ne fournit pas d'actions, celles du blueprint sont utilisées
+- ✅ **Maintenabilité** : Les actions par défaut restent dans le code (blueprint)
+- ✅ **Pas de duplication** : Les actions sont fusionnées intelligemment
+
 ---
 
 ## 🔌 Intégration avec le Backend
@@ -483,6 +545,21 @@ Le backend doit renvoyer des données au format suivant :
   "createdAt": "2024-01-15T10:30:00.000Z",  // ISO string
   "updatedAt": "2024-01-15T10:30:00.000Z",  // ISO string
   "connectors": ["google_calendar", "gmail"],
+  "actions": [  // ← Actions spécifiques à cette carte (optionnel)
+    {
+      "id": "accept",
+      "type": "approve",
+      "label": "Accepter",
+      "requiresConfirmation": false,
+      "icon": "Check"
+    },
+    {
+      "id": "custom-action",
+      "type": "custom",
+      "label": "Action personnalisée",
+      "requiresConfirmation": true
+    }
+  ],
   "payload": {
     "title": "Rendez-vous client",
     "description": "Discussion projet",
@@ -509,6 +586,8 @@ Le backend doit renvoyer des données au format suivant :
 - Les dates peuvent être des **strings ISO** ou des objets `Date` (elles seront normalisées automatiquement)
 - Le `payload` doit correspondre au type défini dans votre `ma-carte.payload.ts`
 - Le `type` doit correspondre à un blueprint enregistré (via `register.ts`)
+- Les `actions` sont **optionnelles** : si absentes, les actions du blueprint seront utilisées
+- Si `actions` est fourni, il sera fusionné avec celles du blueprint (voir section ci-dessus)
 
 ### Architecture du chargement
 
@@ -576,10 +655,12 @@ La fonction `createCardFromApiData()` effectue automatiquement :
 
 Même si les données viennent du backend, les **blueprints restent essentiels** car ils :
 
-1. **Définissent les actions disponibles** via `actions()` (affichées dans le footer de la carte)
+1. **Définissent les actions par défaut** via `actions()` (fusionnées avec celles du backend si présentes)
 2. **Spécifient les connecteurs possibles** (affichés dans l'UI)
 3. **Permettent la génération de données de test** pendant le développement
 4. **Servent de fallback** si des champs optionnels sont manquants
+
+**Note sur les actions** : Les actions du blueprint servent de **base par défaut**. Si le backend fournit des actions pour une carte spécifique, elles sont fusionnées avec celles du blueprint (les actions du backend ont priorité en cas de conflit).
 
 ---
 
@@ -647,7 +728,6 @@ Pour voir des exemples complets et fonctionnels, consultez :
   - Payload avec dates et localisation
   - Blueprint avec génération de dates
   - Renderer avec header optionnel
-
 - **Notification** : `src/features/notification/`
   - Payload simple avec message
   - Blueprint minimal

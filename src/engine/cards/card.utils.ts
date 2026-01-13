@@ -86,8 +86,11 @@ function normalizeDates<T>(obj: T): T {
  *
  * Cette fonction :
  * 1. Normalise les dates (string ISO -> Date)
- * 2. Utilise le CardFactory pour créer la carte avec toutes les données du backend
- * 3. S'assure que le blueprint est enregistré pour le type de carte
+ * 2. Utilise cardFactory.createFromData() pour créer la carte depuis les données réelles
+ * 3. S'assure que le blueprint est enregistré pour le type de carte (validation uniquement)
+ *
+ * Note : Cette fonction n'utilise PAS les factories de mock (defaults/payloadFactory).
+ * Toutes les valeurs proviennent directement du backend.
  *
  * @param apiData - Données brutes reçues de l'API
  * @returns Card normalisée avec toutes les dates converties
@@ -118,9 +121,9 @@ export function createCardFromApiData<TPayload = unknown>(
       ? apiData.updatedAt
       : new Date(apiData.updatedAt)
 
-  // Utiliser cardFactory.create() avec toutes les données du backend comme overrides
-  // Cela garantit que toutes les valeurs viennent du backend, pas des factories de mock
-  return cardFactory.create<TPayload>(apiData.type, {
+  // Utiliser createFromData() pour créer depuis les données réelles du backend
+  // Cette méthode ne passe PAS par les factories de mock (defaults/payloadFactory)
+  return cardFactory.createFromData<TPayload>(apiData.type, {
     id: apiData.id,
     title: apiData.title,
     priority: apiData.priority,
@@ -129,6 +132,7 @@ export function createCardFromApiData<TPayload = unknown>(
     createdAt,
     updatedAt,
     connectors: apiData.connectors,
+    actions: apiData.actions, // Actions venant du backend (optionnel)
   })
 }
 

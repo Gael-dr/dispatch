@@ -76,18 +76,63 @@ export function getQuickActions(): UiAction[] {
 }
 
 /**
+ * Fusionne les actions du backend avec celles du blueprint.
+ * Les actions du backend ont priorité sur celles du blueprint.
+ * Si deux actions ont le même `id`, celle du backend est conservée.
+ *
+ * @param backendActions - Actions venant du backend (optionnel)
+ * @param blueprintActions - Actions définies dans le blueprint (optionnel)
+ * @returns Tableau d'actions fusionnées sans doublons
+ */
+function mergeActions(
+  backendActions?: UiAction[],
+  blueprintActions?: UiAction[]
+): UiAction[] {
+  // Si aucune action, retourner un tableau vide
+  if (!backendActions && !blueprintActions) {
+    return []
+  }
+
+  // Si seulement les actions du backend, les retourner telles quelles
+  if (backendActions && !blueprintActions) {
+    return backendActions
+  }
+
+  // Si seulement les actions du blueprint, les retourner telles quelles
+  if (!backendActions && blueprintActions) {
+    return blueprintActions
+  }
+
+  // Fusion : les actions du backend ont priorité
+  const backendActionIds = new Set(
+    backendActions!.map(action => action.id)
+  )
+
+  // Commencer par les actions du backend (priorité)
+  const merged = [...backendActions!]
+
+  // Ajouter les actions du blueprint qui n'existent pas déjà
+  for (const blueprintAction of blueprintActions!) {
+    if (!backendActionIds.has(blueprintAction.id)) {
+      merged.push(blueprintAction)
+    }
+  }
+
+  return merged
+}
+
+/**
  * Récupère les actions disponibles pour une carte.
- * Les actions sont maintenant définies dans le blueprint de chaque type de carte.
+ * Fusionne les actions du backend (si présentes dans la carte) avec celles définies dans le blueprint.
+ * Les actions du backend ont priorité sur celles du blueprint en cas de conflit (même `id`).
  *
  * @param card - La carte pour laquelle récupérer les actions
- * @returns Un tableau d'actions disponibles, ou un tableau vide si aucune action n'est définie
+ * @returns Un tableau d'actions disponibles, fusionnées depuis le backend et le blueprint
  */
 export function getAvailableActions(card: Card): UiAction[] {
   const blueprint = cardFactory.getBlueprint(card.type)
+  const blueprintActions = blueprint?.actions?.(card)
 
-  if (blueprint?.actions) {
-    return blueprint.actions(card)
-  }
-
-  return []
+  // Fusionner les actions du backend (prioritaires) avec celles du blueprint
+  return mergeActions(card.actions, blueprintActions)
 }

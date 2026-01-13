@@ -21,6 +21,51 @@ export class CardFactory {
     return this
   }
 
+  /**
+   * Crée une carte depuis des données réelles (production).
+   * Ne passe PAS par les factories de mock (defaults/payloadFactory).
+   * Utilisé uniquement pour créer des cartes depuis les données du backend.
+   *
+   * @param type - Type de carte
+   * @param data - Données complètes de la carte (doit être complet)
+   * @returns Card créée depuis les données fournies
+   */
+  createFromData<TPayload = unknown>(
+    type: CardTypeId,
+    data: Omit<Card<TPayload>, 'type'> & {
+      type?: CardTypeId // Optionnel car fourni en paramètre séparé
+    }
+  ): Card<TPayload> {
+    // Vérifier que le blueprint existe pour ce type
+    const bp = this.blueprints.get(type) as CardBlueprint<TPayload> | undefined
+    if (!bp) {
+      throw new Error(`No blueprint registered for type: ${type}`)
+    }
+
+    // Créer directement depuis les données fournies, sans passer par defaults/payloadFactory
+    return {
+      id: data.id,
+      type,
+      title: data.title,
+      payload: data.payload,
+      status: data.status ?? ('pending' as CardStatus),
+      priority: data.priority,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt ?? data.createdAt,
+      connectors: data.connectors ?? bp.connectors,
+      actions: data.actions,
+    }
+  }
+
+  /**
+   * Crée une carte avec des données mockées (développement uniquement).
+   * Utilise defaults() et payloadFactory() pour générer des données de test.
+   *
+   * @param type - Type de carte
+   * @param overrides - Valeurs optionnelles pour surcharger les mocks
+   * @param seed - Graine pour générer des variations
+   * @returns Card avec des données mockées
+   */
   create<TPayload = unknown>(
     type: CardTypeId,
     overrides?: Partial<Omit<Card<TPayload>, 'type' | 'payload'>> & {
@@ -54,15 +99,34 @@ export class CardFactory {
       updatedAt,
 
       connectors: overrides?.connectors ?? bp.connectors,
+      actions: overrides?.actions,
     }
   }
 
+  /**
+   * Crée plusieurs cartes avec des données mockées (développement uniquement).
+   * Utilise create() qui génère des données via defaults() et payloadFactory().
+   *
+   * @param type - Type de carte à créer
+   * @param count - Nombre de cartes à générer
+   * @param seed - Graine de base pour la génération
+   * @returns Tableau de cartes avec des données mockées
+   */
   createMany(type: CardTypeId, count: number, seed = Date.now()) {
     return Array.from({ length: count }, (_, i) =>
       this.create(type, undefined, seed + i)
     )
   }
 
+  /**
+   * Crée un mélange de différents types de cartes avec des données mockées (développement uniquement).
+   * Utilise create() qui génère des données via defaults() et payloadFactory().
+   *
+   * @param types - Types de cartes à mélanger
+   * @param count - Nombre total de cartes à générer
+   * @param seed - Graine de base pour la génération
+   * @returns Tableau de cartes avec des données mockées
+   */
   createMixed(types: CardTypeId[], count: number, seed = Date.now()) {
     return Array.from({ length: count }, (_, i) => {
       const t = types[i % types.length]
