@@ -1,12 +1,15 @@
 import { create } from 'zustand'
 import type { Card } from '@/engine/cards/card.types'
 import { generateMockCards } from './mockCards'
+import { fetchCardsFromBackend } from '@/features/cards/cards.api'
+import { createCardsFromApiData } from '@/engine/cards/card.utils'
 
 export interface CardState {
   cards: Card[]
   selectedCardId: string | null
   isLoading: boolean
   error: string | null
+  isInitialized: boolean // Indique si les cards ont été chargées au démarrage
 
   setCards: (cards: Card[]) => void
   addCard: (card: Card) => void
@@ -18,6 +21,12 @@ export interface CardState {
   setError: (error: string | null) => void
   clearError: () => void
 
+  /**
+   * Charge les cartes depuis le backend au démarrage de l'application.
+   * Utilise les mocks si l'API échoue ou n'est pas disponible.
+   */
+  loadCards: () => Promise<void>
+
   markCardDone: (cardId: string) => void
   skipCard: (cardId: string) => void
 
@@ -28,10 +37,11 @@ export interface CardState {
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
-  cards: generateMockCards(9),
+  cards: [], // Initialisé vide, chargé au démarrage
   selectedCardId: null,
   isLoading: false,
   error: null,
+  isInitialized: false,
 
   setCards: cards => set({ cards }),
 
@@ -91,4 +101,32 @@ export const useCardStore = create<CardState>((set, get) => ({
   setLoading: loading => set({ isLoading: loading }),
   setError: error => set({ error }),
   clearError: () => set({ error: null }),
+
+  loadCards: async () => {
+    // Évite de recharger si déjà initialisé
+    if (get().isInitialized) return
+
+    set({ isLoading: true, error: null })
+
+    try {
+      // Tenter de charger depuis le backend
+      const apiCards = await fetchCardsFromBackend()
+      const cards = createCardsFromApiData(apiCards)
+      set({ cards, isInitialized: true, isLoading: false })
+    } catch (error) {
+      // En cas d'erreur (API non disponible, erreur réseau, etc.)
+      // Utiliser les mocks pour le développement
+      console.warn(
+        'Impossible de charger les cartes depuis le backend, utilisation des mocks:',
+        error
+      )
+      const mockCards = generateMockCards(9)
+      set({
+        cards: mockCards,
+        isInitialized: true,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+      })
+    }
+  },
 }))

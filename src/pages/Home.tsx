@@ -1,23 +1,12 @@
 import { useCardStore } from '@/app/store/cardStore'
-import { generateMockCards } from '@/app/store/mockCards'
 import { SwipeToUnlock } from '@/shared/ui/SwipeToUnlock'
 import { PlusCircleIcon } from 'lucide-react'
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
   const navigate = useNavigate()
   const cards = useCardStore(state => state.cards)
-  const setCards = useCardStore(state => state.setCards)
   const cardCount = cards.length
-
-  // Charger des cartes mockées au montage du composant (uniquement si le store est vide)
-  useEffect(() => {
-    if (cards.length === 0) {
-      const mockCards = generateMockCards(9)
-      setCards(mockCards)
-    }
-  }, [cards.length, setCards])
 
   const handleUnlock = () => {
     navigate('/decisions')

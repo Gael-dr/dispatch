@@ -97,6 +97,14 @@ export interface CalendarPayload {
 
 Le blueprint définit comment votre type de carte est créé. Il utilise le pattern Factory pour générer des cartes de manière cohérente, notamment pour les données de test/mock.
 
+**⚠️ Important** : En production, **presque toutes les données proviennent du backend**. Les blueprints sont principalement utilisés pour :
+- Générer des données de test/mock pendant le développement
+- Fournir des valeurs par défaut si des champs sont manquants
+- Définir les actions disponibles pour ce type de carte
+- Spécifier les connecteurs possibles
+
+Les données réelles du backend seront transformées en Cards via `createCardFromApiData()` (voir la section sur l'intégration API ci-dessous).
+
 ```typescript
 import type { CardBlueprint } from '@/engine/cards/cards.blueprint'
 import type { UiAction } from '@/engine/policies/card.policy'
@@ -416,6 +424,161 @@ Les actions sont automatiquement récupérées par `getAvailableActions()` et af
 
 ---
 
+## 🔌 Intégration avec le Backend
+
+En production, **toutes les données des cartes proviennent du backend** via l'API. Le flux de données est le suivant :
+
+```
+API (Backend) → Normalisation → Card → Store → Renderer
+```
+
+### Utiliser les données du backend
+
+**Les cartes sont chargées automatiquement au démarrage de l'application** via le hook `useInitializeCards()` dans les `Providers`. Vous n'avez **pas besoin** de charger les cartes manuellement dans vos composants.
+
+Le flux est le suivant :
+
+```
+Démarrage App → Providers → useInitializeCards() → Store.loadCards() → API → Store
+```
+
+#### Fonctionnement automatique
+
+1. **Au démarrage** : Le hook `useInitializeCards()` dans `Providers.tsx` appelle `loadCards()`
+2. **Chargement** : Le store tente de charger depuis le backend via `fetchCardsFromBackend()`
+3. **Transformation** : Les données API sont transformées en Cards via `createCardsFromApiData()`
+4. **Fallback** : Si l'API échoue, des mocks sont utilisés automatiquement (développement)
+
+#### Accéder aux cartes dans vos composants
+
+```typescript
+import { useCardStore } from '@/app/store/cardStore'
+
+function MyComponent() {
+  // Les cartes sont déjà chargées au démarrage
+  const cards = useCardStore(state => state.cards)
+  const isLoading = useCardStore(state => state.isLoading)
+  const error = useCardStore(state => state.error)
+
+  if (isLoading) return <div>Chargement...</div>
+  if (error) return <div>Erreur: {error}</div>
+
+  return <div>{cards.length} cartes chargées</div>
+}
+```
+
+### Format des données API
+
+Le backend doit renvoyer des données au format suivant :
+
+```typescript
+// Format attendu par l'API (exemple pour une carte calendar)
+{
+  "id": "card_123",
+  "type": "calendar",
+  "title": "Rendez-vous client",
+  "status": "pending",
+  "priority": "high",
+  "createdAt": "2024-01-15T10:30:00.000Z",  // ISO string
+  "updatedAt": "2024-01-15T10:30:00.000Z",  // ISO string
+  "connectors": ["google_calendar", "gmail"],
+  "payload": {
+    "title": "Rendez-vous client",
+    "description": "Discussion projet",
+    "startDate": "2024-01-20T14:00:00.000Z",  // ISO string
+    "endDate": "2024-01-20T15:00:00.000Z",    // ISO string
+    "location": "Paris",
+    "severity": "warning",
+    "sender": {
+      "name": "Jean Dupont",
+      "role": "Directeur",
+      "initials": "JD",
+      "avatar": "https://..."
+    },
+    "source": {
+      "type": "gmail",
+      "label": "Gmail"
+    }
+  }
+}
+```
+
+**Points importants** :
+- Les dates peuvent être des **strings ISO** ou des objets `Date` (elles seront normalisées automatiquement)
+- Le `payload` doit correspondre au type défini dans votre `ma-carte.payload.ts`
+- Le `type` doit correspondre à un blueprint enregistré (via `register.ts`)
+
+### Architecture du chargement
+
+Le chargement des cartes est centralisé dans le store :
+
+**Fichier** : `src/app/store/cardStore.ts`
+
+```typescript
+export const useCardStore = create<CardState>((set, get) => ({
+  // ... autres propriétés
+  
+  loadCards: async () => {
+    if (get().isInitialized) return // Ne charge qu'une seule fois
+
+    set({ isLoading: true, error: null })
+
+    try {
+      // Tente de charger depuis le backend
+      const apiCards = await fetchCardsFromBackend()
+      const cards = createCardsFromApiData(apiCards)
+      set({ cards, isInitialized: true, isLoading: false })
+    } catch (error) {
+      // Fallback vers les mocks si l'API n'est pas disponible
+      const mockCards = generateMockCards(9)
+      set({ cards: mockCards, isInitialized: true, isLoading: false })
+    }
+  },
+}))
+```
+
+**Fichier** : `src/app/providers.tsx`
+
+```typescript
+function AppInitializer({ children }: { children: ReactNode }) {
+  // Charge les cartes une seule fois au démarrage
+  useInitializeCards()
+  return <>{children}</>
+}
+
+export function Providers({ children }: ProvidersProps) {
+  return (
+    <ThemeProvider>
+      <InteractionProvider>
+        <AppInitializer>
+          {children || <RouterProvider router={router} />}
+        </AppInitializer>
+      </InteractionProvider>
+    </ThemeProvider>
+  )
+}
+```
+
+**Important** : Les composants n'ont **pas besoin** de charger les cartes manuellement. Ils doivent simplement accéder au store avec `useCardStore()`.
+
+### Normalisation automatique
+
+La fonction `createCardFromApiData()` effectue automatiquement :
+- ✅ Conversion des dates ISO strings → objets `Date`
+- ✅ Normalisation récursive des dates dans les payloads (nested objects, arrays)
+- ✅ Vérification que le blueprint est enregistré pour le type de carte
+- ✅ Préservation de toutes les données du backend (aucune valeur mockée n'est utilisée)
+
+### Blueprints et données backend
+
+Même si les données viennent du backend, les **blueprints restent essentiels** car ils :
+1. **Définissent les actions disponibles** via `actions()` (affichées dans le footer de la carte)
+2. **Spécifient les connecteurs possibles** (affichés dans l'UI)
+3. **Permettent la génération de données de test** pendant le développement
+4. **Servent de fallback** si des champs optionnels sont manquants
+
+---
+
 ## 🎨 Personnalisation avancée
 
 ### Ajouter un type de carte dans CardTypeId
@@ -434,15 +597,23 @@ Cependant, ce n'est pas strictement nécessaire car le type `string & {}` permet
 
 ### Utiliser le CardFactory
 
-Si vous utilisez le `CardFactory` pour créer des cartes (dans les tests ou les mocks), ajoutez votre blueprint dans `src/engine/cards/factory.ts` :
+**Note** : Vous n'avez **pas besoin** d'enregistrer manuellement votre blueprint dans `factory.ts`. L'enregistrement se fait automatiquement via votre fichier `register.ts` (voir Étape 4).
+
+Le `CardFactory` est utilisé :
+- **Pour les mocks/tests** : `cardFactory.createMany('ma-carte', 5)` génère 5 cartes mockées
+- **Pour transformer les données backend** : `createCardFromApiData()` utilise le factory en interne
+- **Les blueprints sont enregistrés automatiquement** lors de l'import de `register.ts` dans `providers.tsx`
+
+Si vous devez créer des cartes manuellement dans du code de test, le blueprint sera déjà disponible :
 
 ```typescript
-import { maCarteBlueprint } from '@/features/ma-carte/ma-carte.card.blueprint'
+import { cardFactory } from '@/engine/cards/factory'
 
-export const cardFactory = new CardFactory()
-  .register(calendarBlueprint)
-  .register(notificationBlueprint)
-  .register(maCarteBlueprint) // ← Ajoutez votre blueprint
+// Le blueprint est déjà enregistré via register.ts
+const card = cardFactory.create('ma-carte', {
+  payload: { /* votre payload */ },
+  title: 'Titre personnalisé',
+})
 ```
 
 ---
@@ -520,11 +691,18 @@ Avant de créer une nouvelle carte, posez-vous ces questions :
 Pour créer rapidement une nouvelle carte :
 
 1. Créez le dossier `src/features/ma-carte/`
-2. Définissez `ma-carte.payload.ts` avec votre interface
-3. Créez `ma-carte.card.blueprint.ts` avec la factory et les actions (optionnel)
+2. Définissez `ma-carte.payload.ts` avec votre interface (structure des données du backend)
+3. Créez `ma-carte.card.blueprint.ts` avec la factory (pour les mocks/tests) et les actions
 4. Implémentez `MaCarteRenderer.tsx` avec `CardShell`
 5. Ajoutez `register.ts` avec `registerCard()`
 6. Importez `register.ts` dans `providers.tsx`
+
+**Pour utiliser les données du backend** :
+- Les cartes sont **chargées automatiquement au démarrage** dans `Providers.tsx`
+- Le backend doit renvoyer des données au format `ApiCardData` (dates en ISO string) sur l'endpoint `/api/cards`
+- Les dates seront automatiquement normalisées en objets `Date`
+- En cas d'erreur API, des mocks sont utilisés automatiquement (développement uniquement)
+- Les composants accèdent aux cartes via `useCardStore(state => state.cards)` - **pas besoin de charger manuellement**
 
 Et voilà ! Votre nouvelle carte est prête à être utilisée. 🎉
 
