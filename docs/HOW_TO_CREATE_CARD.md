@@ -98,6 +98,7 @@ export interface CalendarPayload {
 Le blueprint définit comment votre type de carte est créé. Il utilise le pattern Factory pour générer des cartes de manière cohérente, notamment pour les données de test/mock.
 
 **⚠️ Important** : En production, **presque toutes les données proviennent du backend**. Les blueprints sont principalement utilisés pour :
+
 - Générer des données de test/mock pendant le développement
 - Fournir des valeurs par défaut si des champs sont manquants
 - Définir les actions disponibles pour ce type de carte
@@ -504,6 +505,7 @@ Le backend doit renvoyer des données au format suivant :
 ```
 
 **Points importants** :
+
 - Les dates peuvent être des **strings ISO** ou des objets `Date` (elles seront normalisées automatiquement)
 - Le `payload` doit correspondre au type défini dans votre `ma-carte.payload.ts`
 - Le `type` doit correspondre à un blueprint enregistré (via `register.ts`)
@@ -517,7 +519,7 @@ Le chargement des cartes est centralisé dans le store :
 ```typescript
 export const useCardStore = create<CardState>((set, get) => ({
   // ... autres propriétés
-  
+
   loadCards: async () => {
     if (get().isInitialized) return // Ne charge qu'une seule fois
 
@@ -564,6 +566,7 @@ export function Providers({ children }: ProvidersProps) {
 ### Normalisation automatique
 
 La fonction `createCardFromApiData()` effectue automatiquement :
+
 - ✅ Conversion des dates ISO strings → objets `Date`
 - ✅ Normalisation récursive des dates dans les payloads (nested objects, arrays)
 - ✅ Vérification que le blueprint est enregistré pour le type de carte
@@ -572,6 +575,7 @@ La fonction `createCardFromApiData()` effectue automatiquement :
 ### Blueprints et données backend
 
 Même si les données viennent du backend, les **blueprints restent essentiels** car ils :
+
 1. **Définissent les actions disponibles** via `actions()` (affichées dans le footer de la carte)
 2. **Spécifient les connecteurs possibles** (affichés dans l'UI)
 3. **Permettent la génération de données de test** pendant le développement
@@ -600,6 +604,7 @@ Cependant, ce n'est pas strictement nécessaire car le type `string & {}` permet
 **Note** : Vous n'avez **pas besoin** d'enregistrer manuellement votre blueprint dans `factory.ts`. L'enregistrement se fait automatiquement via votre fichier `register.ts` (voir Étape 4).
 
 Le `CardFactory` est utilisé :
+
 - **Pour les mocks/tests** : `cardFactory.createMany('ma-carte', 5)` génère 5 cartes mockées
 - **Pour transformer les données backend** : `createCardFromApiData()` utilise le factory en interne
 - **Les blueprints sont enregistrés automatiquement** lors de l'import de `register.ts` dans `providers.tsx`
@@ -611,7 +616,9 @@ import { cardFactory } from '@/engine/cards/factory'
 
 // Le blueprint est déjà enregistré via register.ts
 const card = cardFactory.create('ma-carte', {
-  payload: { /* votre payload */ },
+  payload: {
+    /* votre payload */
+  },
   title: 'Titre personnalisé',
 })
 ```
@@ -698,6 +705,7 @@ Pour créer rapidement une nouvelle carte :
 6. Importez `register.ts` dans `providers.tsx`
 
 **Pour utiliser les données du backend** :
+
 - Les cartes sont **chargées automatiquement au démarrage** dans `Providers.tsx`
 - Le backend doit renvoyer des données au format `ApiCardData` (dates en ISO string) sur l'endpoint `/api/cards`
 - Les dates seront automatiquement normalisées en objets `Date`

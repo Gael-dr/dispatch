@@ -11,15 +11,32 @@ export const notificationBlueprint: CardBlueprint<NotificationPayload> = {
   }),
 
   payloadFactory: seed => {
-    const names = ['Sarah Chen', 'Alex Rivera', 'Emma Wilson', 'Tom Anderson', 'Lisa Garcia']
-    const roles = ['Team Lead', 'Developer', 'Designer', 'Product Manager', 'QA Engineer']
+    const names = [
+      'Sarah Chen',
+      'Alex Rivera',
+      'Emma Wilson',
+      'Tom Anderson',
+      'Lisa Garcia',
+    ]
+    const roles = [
+      'Team Lead',
+      'Developer',
+      'Designer',
+      'Product Manager',
+      'QA Engineer',
+    ]
     const sources = [
       { type: 'gmail' as const, label: 'Gmail' },
       { type: 'custom' as const, label: 'Slack' },
       { type: 'linkedin' as const, label: 'LinkedIn' },
       { type: 'direct' as const, label: 'Direct' },
     ]
-    const severities: Array<'info' | 'warning' | 'error' | 'success'> = ['info', 'warning', 'error', 'success']
+    const severities: Array<'info' | 'warning' | 'error' | 'success'> = [
+      'info',
+      'warning',
+      'error',
+      'success',
+    ]
     const messages = [
       'Nouveau message dans le canal #general',
       'Vous avez été mentionné dans un thread',

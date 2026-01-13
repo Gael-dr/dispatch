@@ -30,7 +30,7 @@ type ApiPayloadData<T> = T extends Date
 /**
  * Normalise récursivement les dates dans un objet.
  * Convertit les strings ISO en objets Date.
- * 
+ *
  * Détecte automatiquement les formats ISO 8601 courants :
  * - "2024-01-15T10:30:00.000Z"
  * - "2024-01-15T10:30:00Z"
@@ -52,8 +52,9 @@ function normalizeDates<T>(obj: T): T {
       // Pattern simplifié pour éviter les problèmes d'échappement
       // Accepte: YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS, YYYY-MM-DDTHH:MM:SS.ms, avec Z ou timezone
       const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/
-      const dateTimePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?$/
-      
+      const dateTimePattern =
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?$/
+
       if (dateOnlyPattern.test(trimmed) || dateTimePattern.test(trimmed)) {
         return new Date(timestamp) as unknown as T
       }
@@ -82,20 +83,20 @@ function normalizeDates<T>(obj: T): T {
 
 /**
  * Crée une Card à partir de données reçues de l'API.
- * 
+ *
  * Cette fonction :
  * 1. Normalise les dates (string ISO -> Date)
  * 2. Utilise le CardFactory pour créer la carte avec toutes les données du backend
  * 3. S'assure que le blueprint est enregistré pour le type de carte
- * 
+ *
  * @param apiData - Données brutes reçues de l'API
  * @returns Card normalisée avec toutes les dates converties
- * 
+ *
  * @example
  * ```typescript
  * const apiResponse = await fetch('/api/cards')
  * const apiCards = await apiResponse.json()
- * const cards = apiCards.map((apiCard: ApiCardData) => 
+ * const cards = apiCards.map((apiCard: ApiCardData) =>
  *   createCardFromApiData(apiCard)
  * )
  * useCardStore.getState().setCards(cards)
@@ -133,7 +134,7 @@ export function createCardFromApiData<TPayload = unknown>(
 
 /**
  * Crée plusieurs Cards à partir d'un tableau de données API.
- * 
+ *
  * @param apiCards - Tableau de données brutes reçues de l'API
  * @returns Tableau de Cards normalisées
  */

@@ -1,12 +1,12 @@
-import '@/features/notification/register'
 import '@/features/calendar/register'
+import '@/features/notification/register'
 
 import { ReactNode } from 'react'
 import { RouterProvider } from 'react-router-dom'
-import { router } from './router'
-import { InteractionProvider } from './interaction/InteractionProvider'
-import { ThemeProvider } from './theme/ThemeProvider'
 import { useInitializeCards } from './hooks/useInitializeCards'
+import { InteractionProvider } from './interaction/InteractionProvider'
+import { router } from './router'
+import { ThemeProvider } from './theme/ThemeProvider'
 
 interface ProvidersProps {
   children?: ReactNode

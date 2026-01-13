@@ -13,16 +13,33 @@ export const calendarBlueprint: CardBlueprint<CalendarPayload> = {
   payloadFactory: seed => {
     const start = new Date(seed + 24 * 60 * 60 * 1000)
     const end = new Date(start.getTime() + 60 * 60 * 1000)
-    
-    const names = ['Jean Dupont', 'Marie Martin', 'Pierre Dubois', 'Sophie Bernard', 'Luc Moreau']
-    const roles = ['Directeur', 'Manager', 'Développeur', 'Designer', 'Product Owner']
+
+    const names = [
+      'Jean Dupont',
+      'Marie Martin',
+      'Pierre Dubois',
+      'Sophie Bernard',
+      'Luc Moreau',
+    ]
+    const roles = [
+      'Directeur',
+      'Manager',
+      'Développeur',
+      'Designer',
+      'Product Owner',
+    ]
     const sources = [
       { type: 'gmail' as const, label: 'Gmail' },
       { type: 'calendar' as const, label: 'Google Calendar' },
       { type: 'linkedin' as const, label: 'LinkedIn' },
       { type: 'direct' as const, label: 'Invitation directe' },
     ]
-    const severities: Array<'info' | 'warning' | 'error' | 'success'> = ['info', 'warning', 'error', 'success']
+    const severities: Array<'info' | 'warning' | 'error' | 'success'> = [
+      'info',
+      'warning',
+      'error',
+      'success',
+    ]
 
     const nameIndex = seed % names.length
     const name = names[nameIndex]

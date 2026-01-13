@@ -1,8 +1,8 @@
-import { create } from 'zustand'
 import type { Card } from '@/engine/cards/card.types'
-import { generateMockCards } from './mockCards'
-import { fetchCardsFromBackend } from '@/features/cards/cards.api'
 import { createCardsFromApiData } from '@/engine/cards/card.utils'
+import { fetchCardsFromBackend } from '@/features/cards/cards.api'
+import { create } from 'zustand'
+import { generateMockCards } from './mockCards'
 
 export interface CardState {
   cards: Card[]

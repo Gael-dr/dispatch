@@ -1,5 +1,5 @@
-import { apiClient } from '@/shared/api/apiClient'
 import type { ApiCardData } from '@/engine/cards/card.utils'
+import { apiClient } from '@/shared/api/apiClient'
 
 /**
  * API pour récupérer les cartes depuis le backend.
@@ -8,7 +8,7 @@ import type { ApiCardData } from '@/engine/cards/card.utils'
 
 /**
  * Récupère toutes les cartes depuis le backend.
- * 
+ *
  * @returns Tableau de données brutes des cartes depuis l'API
  */
 export async function fetchCardsFromBackend(): Promise<ApiCardData[]> {
