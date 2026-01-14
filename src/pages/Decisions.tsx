@@ -4,6 +4,7 @@ import { CardStack } from '@/features/cards/CardStack'
 import { UserAvatar } from '@/features/user/UserAvatar'
 import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ModalManager } from '@/app/modal/ModalManager'
 
 export default function Decisions() {
   const navigate = useNavigate()
@@ -41,10 +42,19 @@ export default function Decisions() {
     }
   }, [isLoading, pendingCards.length, cards.length, navigate])
 
-  const handleCardAction = (cardId: string, actionId: string) => {
-    console.log(`Action ${actionId} sur la carte ${cardId}`)
+  const handleCardAction = (cardId: string, actionId: string, data?: unknown) => {
+    console.log(`Action ${actionId} sur la carte ${cardId}`, data)
     // TODO: mapper actionId -> action métier / API si besoin
+    // Pour l'instant, on marque la carte comme done après l'action
     markCardDone(cardId)
+  }
+
+  const handleModalActionConfirm = (actionId: string, data?: unknown) => {
+    // Trouver la carte active (première carte pending)
+    const activeCard = pendingCards[0]
+    if (activeCard) {
+      handleCardAction(activeCard.id, actionId, data)
+    }
   }
 
   return (
@@ -86,6 +96,9 @@ export default function Decisions() {
           onCardAction={handleCardAction}
         />
       </div>
+
+      {/* Gestionnaire de modals */}
+      <ModalManager onActionConfirm={handleModalActionConfirm} />
     </section>
   )
 }

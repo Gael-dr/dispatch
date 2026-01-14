@@ -26,6 +26,7 @@ export function CardShell({
           <CardActions
             actions={getAvailableActions(card)}
             onAction={onAction}
+            card={card}
           />
         </div>
       </div>
