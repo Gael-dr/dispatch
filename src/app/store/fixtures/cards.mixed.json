@@ -18,7 +18,17 @@
             "context": {
                 "message": "Message important à lire."
             },
-            "location": "Paris"
+            "location": "Paris",
+            "sender": {
+                "name": "John Doe",
+                "role": "CEO",
+                "initials": "JD",
+                "avatar": "https://via.placeholder.com/150"
+            },
+            "source": {
+                "type": "gmail",
+                "label": "Gmail"
+            }
         }
     },
     {
