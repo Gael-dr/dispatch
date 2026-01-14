@@ -14,7 +14,12 @@ export function Icon({
   size?: number
   className?: string
 } & React.SVGProps<SVGSVGElement>) {
-  const IconComponent = (LucideIcons as unknown as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name]
+  const IconComponent = (
+    LucideIcons as unknown as Record<
+      string,
+      React.ComponentType<React.SVGProps<SVGSVGElement>>
+    >
+  )[name]
 
   if (!IconComponent) {
     // placeholder empty box to keep layout if icon missing

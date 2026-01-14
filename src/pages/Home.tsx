@@ -2,8 +2,8 @@ import { useCardStore } from '@/app/store/cardStore'
 import { useCardRepo } from '@/app/data/DataProvider'
 import { SwipeToUnlock } from '@/shared/ui/SwipeToUnlock'
 import { PlusCircleIcon } from 'lucide-react'
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 export default function Home() {
   const navigate = useNavigate()

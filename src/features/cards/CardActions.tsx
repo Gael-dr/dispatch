@@ -1,23 +1,28 @@
+// Actions principales des cards - Composant dédié aux actions spécifiques à chaque card
+import { ComponentProps } from 'react'
 import type { UiAction } from '../../engine/policies/card.policy'
+import { getButtonTypeForAction } from '../../engine/policies/card.policy'
+import { ActionBar } from '../../shared/ui/ActionBar'
+import { ActionButton } from '../../shared/ui/ActionButton'
+import { Icon } from '../../shared/ui/Icon'
 
-export function CardActions({
-  actions,
-  onAction,
-}: {
+interface CardActionsProps {
   actions: UiAction[]
   onAction?: (actionId: string) => void
-}) {
+}
+
+export function CardActions({ actions, onAction }: CardActionsProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
-      {actions.map(a => (
-        <button
-          key={a.id}
-          onClick={() => onAction?.(a.id)}
-          className="px-4 py-2 rounded-2xl bg-slate-800/40 border border-white/10 text-white font-bold text-sm hover:bg-slate-800/55 transition"
-        >
-          {a.label}
-        </button>
+    <ActionBar position="top">
+      {actions.map(action => (
+        <ActionButton
+          key={action.id}
+          label={action.label}
+          icon={action.icon as ComponentProps<typeof Icon>['name'] | undefined}
+          buttonType={getButtonTypeForAction(action.type)}
+          onClick={() => onAction?.(action.id)}
+        />
       ))}
-    </div>
+    </ActionBar>
   )
 }

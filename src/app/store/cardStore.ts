@@ -1,22 +1,20 @@
-import { create } from 'zustand'
 import type { Card } from '@/engine/cards/card.types'
 import type { CardRepository } from '@/engine/cards/card.repository'
+import { create } from 'zustand'
 
 export interface CardState {
   cards: Card[]
   selectedCardId: string | null
   isLoading: boolean
   error: string | null
+  isInitialized: boolean // Indique si les cards ont été chargées au démarrage
 
-  // NEW
   loadCards: (repo: CardRepository) => Promise<void>
-
   setCards: (cards: Card[]) => void
   addCard: (card: Card) => void
   removeCard: (cardId: string) => void
   updateCard: (cardId: string, updates: Partial<Card>) => void
   selectCard: (cardId: string | null) => void
-
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
@@ -31,16 +29,20 @@ export interface CardState {
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
-  cards: [], // ✅ vide au départ (comme en réel)
+  cards: [], // Initialisé vide, chargé au démarrage
   selectedCardId: null,
   isLoading: false,
   error: null,
+  isInitialized: false,
 
   loadCards: async repo => {
+    // Évite de recharger si déjà initialisé
+    if (get().isInitialized) return
+
     set({ isLoading: true, error: null })
     try {
       const cards = await repo.list()
-      set({ cards, isLoading: false })
+      set({ cards, isInitialized: true, isLoading: false })
     } catch (e) {
       set({
         isLoading: false,
@@ -54,12 +56,15 @@ export const useCardStore = create<CardState>((set, get) => ({
   removeCard: cardId =>
     set(state => ({
       cards: state.cards.filter(card => card.id !== cardId),
-      selectedCardId: state.selectedCardId === cardId ? null : state.selectedCardId,
+      selectedCardId:
+        state.selectedCardId === cardId ? null : state.selectedCardId,
     })),
   updateCard: (cardId, updates) =>
     set(state => ({
       cards: state.cards.map(card =>
-        card.id === cardId ? { ...card, ...updates, updatedAt: new Date() } : card
+        card.id === cardId
+          ? { ...card, ...updates, updatedAt: new Date() }
+          : card
       ),
     })),
   selectCard: cardId => set({ selectedCardId: cardId }),
