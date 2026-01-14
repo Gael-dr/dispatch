@@ -7,7 +7,7 @@ Ce guide détaille le processus complet pour créer un nouveau type de carte dan
 Le système de cartes repose sur **4 composants principaux** :
 
 1. **Payload Type** : Définit la structure des données spécifiques à votre carte
-2. **Blueprint** : Définit comment créer des cartes de ce type (factory pattern)
+2. **Config** : Définit la configuration du type de carte (actions, connecteurs)
 3. **Renderer** : Composant React qui affiche la carte
 4. **Registration** : Fichier qui enregistre la carte dans les systèmes
 
@@ -18,7 +18,7 @@ Pour créer une nouvelle carte de type `ma-carte`, créez un dossier dans `src/f
 ```
 src/features/ma-carte/
 ├── ma-carte.payload.ts          # Type TypeScript pour le payload
-├── ma-carte.card.blueprint.ts   # Définition du blueprint (factory)
+├── ma-carte.card.config.ts      # Configuration du type de carte
 ├── MaCarteRenderer.tsx          # Composant React pour le rendu
 └── register.ts                  # Enregistrement de la carte
 ```
@@ -91,57 +91,34 @@ export interface CalendarPayload {
 
 ---
 
-### Étape 2 : Créer le Blueprint
+### Étape 2 : Créer la Config
 
-**Fichier** : `src/features/ma-carte/ma-carte.card.blueprint.ts`
+**Fichier** : `src/features/ma-carte/ma-carte.card.config.ts`
 
-Le blueprint définit comment votre type de carte est créé. Il utilise le pattern Factory pour générer des cartes de manière cohérente, notamment pour les données de test/mock.
+La config définit la configuration de votre type de carte pour la production. Elle contient les actions disponibles et les connecteurs possibles.
 
-**⚠️ Important** : En production, **presque toutes les données proviennent du backend**. Les blueprints sont principalement utilisés pour :
+**⚠️ Important** : En production, **toutes les données proviennent du backend**. La config est utilisée pour :
 
-- Générer des données de test/mock pendant le développement
-- Fournir des valeurs par défaut si des champs sont manquants
 - Définir les actions disponibles pour ce type de carte
-- Spécifier les connecteurs possibles
+- Spécifier les connecteurs possibles (utilisés comme fallback si non fournis par le backend)
 
-Les données réelles du backend seront transformées en Cards via `createCardFromApiData()` (voir la section sur l'intégration API ci-dessous).
+Les mocks sont gérés séparément via les fixtures JSON dans `src/app/store/fixtures/`.
 
 ```typescript
-import type { CardBlueprint } from '@/engine/cards/cards.blueprint'
+import type { CardConfig } from '@/engine/cards/cards.config'
 import type { UiAction } from '@/engine/policies/card.policy'
+import type { MaCartePayload } from './ma-carte.payload'
 
-// Type pour les données nécessaires à la génération du payload
-export type MaCarteMockPayload = {
-  title: string
-  customField: string
-  // ... autres propriétés nécessaires pour générer le payload
-}
-
-export const maCarteBlueprint: CardBlueprint<MaCarteMockPayload> = {
+export const maCarteConfig: CardConfig<MaCartePayload> = {
   // Identifiant unique du type de carte
   type: 'ma-carte',
 
-  // Connecteurs possibles/requis pour ce type de carte
-  connectors: ['gmail', 'slack'], // optionnel
-
-  // Valeurs par défaut pour les propriétés de base de la carte
-  defaults: (seed: number) => ({
-    title: `Ma carte ${seed % 1000}`, // Utilisez le seed pour varier
-    priority: 'normal', // 'low' | 'normal' | 'high'
-  }),
-
-  // Factory pour générer le payload typé
-  payloadFactory: (seed: number) => {
-    // Utilisez le seed pour générer des données variées
-    return {
-      title: `Ma carte ${seed % 1000}`,
-      customField: `Valeur ${seed}`,
-      // ... générez d'autres propriétés selon vos besoins
-    }
-  },
+  // Connecteurs possibles/requis pour ce type de carte (optionnel)
+  connectors: ['gmail', 'slack'],
 
   // Actions spécifiques à ce type de carte (optionnel)
-  actions: () => [
+  // La fonction reçoit la carte en paramètre pour des actions dynamiques
+  actions: (card) => [
     {
       id: 'action-approve',
       type: 'approve',
@@ -158,43 +135,39 @@ export const maCarteBlueprint: CardBlueprint<MaCarteMockPayload> = {
 }
 ```
 
-**Exemple concret** (basé sur `calendar.card.blueprint.ts`) :
+**Exemple concret** (basé sur `calendar.card.config.ts`) :
 
 ```typescript
-export type CalendarMockPayload = {
-  title: string
-  description: string
-  startDate: Date
-  endDate: Date
-  location?: string
-}
+import type { CardConfig } from '@/engine/cards/cards.config'
+import type { CalendarPayload } from './calendar.payload'
 
-export const calendarBlueprint: CardBlueprint<CalendarMockPayload> = {
+export const calendarConfig: CardConfig<CalendarPayload> = {
   type: 'calendar',
   connectors: ['google_calendar', 'gmail'],
-  defaults: seed => ({
-    title: `Rendez-vous ${seed % 1000}`,
-    priority: 'normal',
-  }),
-  payloadFactory: seed => {
-    const start = new Date(seed + 24 * 60 * 60 * 1000)
-    const end = new Date(start.getTime() + 60 * 60 * 1000)
-    return {
-      title: `Rendez-vous ${seed % 1000}`,
-      description: 'Ce rendez-vous nécessite votre attention...',
-      startDate: start,
-      endDate: end,
-      location: ['Paris', 'Lyon', 'Marseille'][seed % 3],
-    }
-  },
+  actions: () => [
+    {
+      id: 'accept',
+      type: 'approve',
+      label: 'Accepter',
+      icon: 'Check',
+      requiresConfirmation: false,
+    },
+    {
+      id: 'reject',
+      type: 'reject',
+      label: 'Refuser',
+      icon: 'X',
+      requiresConfirmation: false,
+    },
+  ],
 }
 ```
 
 **Points importants** :
 
-- Le `seed` est un nombre unique utilisé pour générer des variations
-- Utilisez le seed de manière créative (modulo, arrays, dates, etc.)
 - Le `type` doit correspondre à l'identifiant que vous utiliserez partout
+- Les actions peuvent être dynamiques en fonction de la carte (fonction au lieu d'un tableau)
+- Les connecteurs sont utilisés comme fallback si non fournis par le backend
 
 ---
 
@@ -339,44 +312,40 @@ export function CalendarCardRenderer({
 
 Ce fichier enregistre votre carte dans les deux systèmes en une seule opération :
 
-1. Le registre métier (pour la création de cartes)
+1. Le registre métier (pour la configuration)
 2. Le registre UI (pour le rendu)
 
 ```typescript
 import { registerCard } from '@/engine/cards/card.registry'
 
-import { maCarteBlueprint } from './ma-carte.card.blueprint'
+import { maCarteConfig } from './ma-carte.card.config'
 import { MaCarteRenderer } from './MaCarteRenderer'
 
-// Enregistrement unifié : blueprint + renderer
-registerCard(maCarteBlueprint, MaCarteRenderer)
-
-export {}
+// Enregistrement unifié : config + renderer
+registerCard(maCarteConfig, MaCarteRenderer)
 ```
 
 <b>Avantages du helper `registerCard()`</b> :
 
 - ✅ Plus simple : une seule fonction au lieu de deux
-- ✅ Type-safe : le type est automatiquement extrait du blueprint
+- ✅ Type-safe : le type est automatiquement extrait de la config
 - ✅ Impossible d'oublier un enregistrement
-- ✅ Garantit la cohérence entre blueprint et renderer
+- ✅ Garantit la cohérence entre config et renderer
 
-**Important** : L'export vide `export { }` est nécessaire pour que TypeScript traite ce fichier comme un module et exécute le code d'enregistrement.
 
 ---
 
 ### Étape 5 : Importer le fichier register dans l'application
 
-**Fichier** : `src/app/providers.tsx`
+**Fichier** : `engine/cards/RegisterAll.ts`
 
-Ajoutez l'import de votre fichier `register.ts` au début du fichier pour que l'enregistrement soit exécuté au démarrage de l'application.
+Ajoutez l'import de votre fichier `register.ts` dans le fichier pour que l'enregistrement soit exécuté au démarrage de l'application.
 
 ```typescript
 import '@/features/notification/register'
 import '@/features/calendar/register'
 import '@/features/ma-carte/register' // ← Ajoutez votre ligne ici
 
-// ... reste du fichier
 ```
 
 **Note** : L'import avec `@/` est important car il garantit que le code est exécuté, même si le module n'exporte rien directement.
@@ -385,16 +354,17 @@ import '@/features/ma-carte/register' // ← Ajoutez votre ligne ici
 
 ### Étape 6 : Définir des actions spécifiques (Optionnel)
 
-**Fichier** : `src/features/ma-carte/ma-carte.card.blueprint.ts`
+**Fichier** : `src/features/ma-carte/ma-carte.card.config.ts`
 
-Les actions spécifiques à votre type de carte sont maintenant définies directement dans le blueprint pour une meilleure co-location.
+Les actions spécifiques à votre type de carte sont définies directement dans la config pour une meilleure co-location.
 
 ```typescript
-// Dans votre blueprint
-export const maCarteBlueprint: CardBlueprint<MaCarteMockPayload> = {
+// Dans votre config
+export const maCarteConfig: CardConfig<MaCartePayload> = {
   // ... autres propriétés
 
-  actions: () => [
+  // La fonction reçoit la carte en paramètre pour des actions dynamiques
+  actions: (card) => [
     {
       id: 'action-approve',
       type: 'approve',
@@ -417,83 +387,129 @@ export const maCarteBlueprint: CardBlueprint<MaCarteMockPayload> = {
 - ✅ Actions peuvent être dynamiques selon la carte (fonction au lieu d'un tableau statique)
 - ✅ Plus facile à maintenir : tout est au même endroit
 
-Les actions sont automatiquement récupérées par `getAvailableActions()` et affichées dans le footer de la carte via `CardShell` qui utilise `CardActions`.
+Les actions sont automatiquement récupérées par `getAvailableActions(card)` qui :
+1. Récupère la config pour le type de carte
+2. Appelle `config.actions(card)` si défini
+3. Retourne les actions (ou un tableau vide si aucune action n'est définie)
 
-**Note** : Si vous ne définissez pas d'actions, un tableau vide sera retourné par défaut.
+Les actions sont ensuite affichées dans le footer de la carte via `CardShell` qui utilise `CardActions`.
 
-### Fusion des actions : Backend + Blueprint
+**Note** : Si vous ne définissez pas d'actions dans la config, un tableau vide sera retourné par défaut.
 
-**Le système fusionne automatiquement les actions venant de deux sources** :
+### Actions dynamiques depuis la Config
 
-1. **Actions du backend** : Définies dans la réponse API pour chaque carte spécifique
-2. **Actions du blueprint** : Définies dans le blueprint comme actions par défaut pour le type de carte
+**Les actions sont définies dans la config** via une fonction qui reçoit la carte en paramètre :
 
-#### Stratégie de fusion
+```typescript
+actions?: (card: Card<TPayload>) => UiAction[]
+```
 
-- **Priorité** : Les actions du backend ont **priorité** sur celles du blueprint
-- **Déduplication** : Si deux actions ont le même `id`, celle du backend est conservée
-- **Complémentarité** : Les actions du blueprint sont ajoutées si elles n'existent pas déjà
-
-**Fonction de fusion** : `mergeActions(backendActions, blueprintActions)` dans `card.policy.ts`
+Cette approche permet de définir des **actions dynamiques** basées sur l'état de la carte (statut, priorité, payload, etc.).
 
 #### Scénarios d'utilisation
 
-**Scénario 1 : Actions uniquement du blueprint**
+**Scénario 1 : Actions statiques**
 
 ```typescript
-// Backend ne fournit pas d'actions
-card = { ...données backend, actions: undefined }
-blueprint.actions = [{ id: 'accept', ... }, { id: 'reject', ... }]
-// → Résultat: [accept, reject] (uniquement depuis le blueprint)
-```
-
-**Scénario 2 : Actions uniquement du backend**
-
-```typescript
-// Backend fournit des actions, blueprint n'en a pas
-card = { ...données backend, actions: [{ id: 'custom-action', ... }] }
-blueprint.actions = undefined
-// → Résultat: [custom-action] (uniquement depuis le backend)
-```
-
-**Scénario 3 : Fusion des deux sources (recommandé)**
-
-```typescript
-// Backend fournit des actions spécifiques, blueprint définit les actions par défaut
-card = {
-  ...données backend,
-  actions: [
-    { id: 'accept', type: 'approve', label: 'Accepter (Backend)' },
-    { id: 'custom', type: 'custom', label: 'Action personnalisée' }
-  ]
-}
-blueprint.actions = () => [
+// Actions toujours disponibles pour ce type de carte
+config.actions = (card) => [
   { id: 'accept', type: 'approve', label: 'Accepter' },
   { id: 'reject', type: 'reject', label: 'Refuser' }
 ]
-// → Résultat: [
-//     { id: 'accept', ... } depuis backend (priorité),
-//     { id: 'custom', ... } depuis backend,
-//     { id: 'reject', ... } depuis blueprint (pas de conflit)
-//   ]
+```
+
+**Scénario 2 : Actions conditionnelles**
+
+```typescript
+// Actions selon le statut de la carte
+config.actions = (card) => {
+  if (card.status === 'pending') {
+    return [
+      { id: 'accept', type: 'approve', label: 'Accepter' },
+      { id: 'reject', type: 'reject', label: 'Refuser' }
+    ]
+  }
+  return []  // Pas d'actions si déjà traitée
+}
+```
+
+**Scénario 3 : Actions dynamiques depuis la config**
+
+```typescript
+// La config définit des actions dynamiques basées sur la carte
+config.actions = (card) => {
+  const actions = []
+  
+  if (card.status === 'pending') {
+    actions.push({ id: 'accept', type: 'approve', label: 'Accepter' })
+    actions.push({ id: 'reject', type: 'reject', label: 'Refuser' })
+  }
+  
+  if (card.priority === 'high') {
+    actions.push({ id: 'defer', type: 'defer', label: 'Reporter' })
+  }
+  
+  return actions
+}
+// → Résultat: Actions conditionnelles selon l'état de la carte
+```
+
+**Note** : Actuellement, les actions du backend ne sont pas directement supportées dans le DTO. Les actions sont définies uniquement dans les configs. Si vous avez besoin d'actions spécifiques par carte depuis le backend, vous devrez étendre le système.
+
+**Scénario 4 : Actions basées sur le payload**
+
+```typescript
+// Actions selon les données du payload
+config.actions = (card) => {
+  const payload = card.payload as MaCartePayload
+  
+  const actions = []
+  
+  if (payload.severity === 'error') {
+    actions.push({ id: 'urgent', type: 'mark-urgent', label: 'Marquer urgent' })
+  }
+  
+  if (payload.customField === 'approvable') {
+    actions.push({ id: 'approve', type: 'approve', label: 'Approuver' })
+  }
+  
+  return actions
+}
 ```
 
 #### Avantages de cette approche
 
-- ✅ **Flexibilité** : Le backend peut personnaliser les actions par carte
-- ✅ **Fallback** : Si le backend ne fournit pas d'actions, celles du blueprint sont utilisées
-- ✅ **Maintenabilité** : Les actions par défaut restent dans le code (blueprint)
-- ✅ **Pas de duplication** : Les actions sont fusionnées intelligemment
+- ✅ **Flexibilité** : Actions dynamiques basées sur l'état de la carte
+- ✅ **Maintenabilité** : Toutes les actions sont définies dans la config (co-location)
+- ✅ **Type-safe** : Le payload est typé dans la fonction `actions(card)`
+- ✅ **Pas de duplication** : Les actions sont définies une seule fois dans la config
 
 ---
 
 ## 🔌 Intégration avec le Backend
 
-En production, **toutes les données des cartes proviennent du backend** via l'API. Le flux de données est le suivant :
+En production, **toutes les données des cartes proviennent du backend** via l'API. Le système utilise un **pattern Repository** pour abstraire la source de données.
+
+Le flux de données est le suivant :
 
 ```
-API (Backend) → Normalisation → Card → Store → Renderer
+Repository (API/JSON) → Transformation → Card → Store → Renderer
 ```
+
+### Architecture Repository
+
+Le système utilise une interface `CardRepository` pour abstraire la source de données :
+
+```typescript
+export interface CardRepository {
+  list(): Promise<Card[]>
+}
+```
+
+Deux implémentations sont disponibles :
+
+1. **`ApiCardRepository`** : Charge les cartes depuis l'API backend (production)
+2. **`JsonCardRepository`** : Charge les cartes depuis un fichier JSON (développement)
 
 ### Utiliser les données du backend
 
@@ -502,15 +518,19 @@ API (Backend) → Normalisation → Card → Store → Renderer
 Le flux est le suivant :
 
 ```
-Démarrage App → Providers → useInitializeCards() → Store.loadCards() → API → Store
+Démarrage App → Providers → DataProvider → useInitializeCards() → Store.loadCards(repo) → Repository → Store
 ```
 
 #### Fonctionnement automatique
 
-1. **Au démarrage** : Le hook `useInitializeCards()` dans `Providers.tsx` appelle `loadCards()`
-2. **Chargement** : Le store tente de charger depuis le backend via `fetchCardsFromBackend()`
-3. **Transformation** : Les données API sont transformées en Cards via `createCardsFromApiData()`
-4. **Fallback** : Si l'API échoue, des mocks sont utilisés automatiquement (développement)
+1. **Au démarrage** : Le `Providers` crée le repository approprié selon l'environnement :
+   - **Développement** (`import.meta.env.DEV`) : `JsonCardRepository` (fichier JSON)
+   - **Production** : `ApiCardRepository` (API backend)
+2. **DataProvider** : Le repository est fourni via un contexte React (`DataProvider`)
+3. **Initialisation** : Le hook `useInitializeCards()` récupère le repository depuis le contexte et appelle `loadCards(repo)`
+4. **Chargement** : Le store appelle `repo.list()` pour charger les cartes
+5. **Transformation** : Les données sont transformées en Cards via `dtoToCard()` (normalisation des dates)
+6. **Stockage** : Les cartes sont stockées dans le store Zustand
 
 #### Accéder aux cartes dans vos composants
 
@@ -530,41 +550,41 @@ function MyComponent() {
 }
 ```
 
-### Format des données API
+#### Accéder au repository (si nécessaire)
 
-Le backend doit renvoyer des données au format suivant :
+Si vous avez besoin d'accéder directement au repository (par exemple pour des opérations personnalisées), utilisez le hook `useCardRepo()` :
 
 ```typescript
-// Format attendu par l'API (exemple pour une carte calendar)
+import { useCardRepo } from '@/app/data/DataProvider'
+
+function MyComponent() {
+  const repo = useCardRepo()
+  
+  // Le repository est disponible pour des opérations personnalisées
+  // Par exemple : repo.list(), repo.markDone(id), etc.
+}
+```
+
+### Format des données API
+
+Le backend doit renvoyer des données au format `CardDTO` suivant :
+
+```typescript
+// Format attendu par l'API (CardDTO)
 {
   "id": "card_123",
   "type": "calendar",
-  "title": "Rendez-vous client",
+  "title": "Rendez-vous client",  // Optionnel, peut être extrait du payload
   "status": "pending",
-  "priority": "high",
+  "priority": "high",  // Optionnel
   "createdAt": "2024-01-15T10:30:00.000Z",  // ISO string
   "updatedAt": "2024-01-15T10:30:00.000Z",  // ISO string
-  "connectors": ["google_calendar", "gmail"],
-  "actions": [  // ← Actions spécifiques à cette carte (optionnel)
-    {
-      "id": "accept",
-      "type": "approve",
-      "label": "Accepter",
-      "requiresConfirmation": false,
-      "icon": "Check"
-    },
-    {
-      "id": "custom-action",
-      "type": "custom",
-      "label": "Action personnalisée",
-      "requiresConfirmation": true
-    }
-  ],
+  "connectors": ["google_calendar", "gmail"],  // Optionnel
   "payload": {
     "title": "Rendez-vous client",
     "description": "Discussion projet",
-    "startDate": "2024-01-20T14:00:00.000Z",  // ISO string
-    "endDate": "2024-01-20T15:00:00.000Z",    // ISO string
+    "startDate": "2024-01-20T14:00:00.000Z",  // ISO string (sera convertie en Date)
+    "endDate": "2024-01-20T15:00:00.000Z",    // ISO string (sera convertie en Date)
     "location": "Paris",
     "severity": "warning",
     "sender": {
@@ -583,15 +603,16 @@ Le backend doit renvoyer des données au format suivant :
 
 **Points importants** :
 
-- Les dates peuvent être des **strings ISO** ou des objets `Date` (elles seront normalisées automatiquement)
+- Les dates dans le payload sont des **strings ISO** et seront automatiquement converties en objets `Date` par `dtoToCard()`
+- Le `title` au niveau racine est **optionnel** : s'il est absent, il sera extrait du `payload.title` si disponible
 - Le `payload` doit correspondre au type défini dans votre `ma-carte.payload.ts`
-- Le `type` doit correspondre à un blueprint enregistré (via `register.ts`)
-- Les `actions` sont **optionnelles** : si absentes, les actions du blueprint seront utilisées
-- Si `actions` est fourni, il sera fusionné avec celles du blueprint (voir section ci-dessus)
+- Le `type` doit correspondre à une config enregistrée (via `register.ts`)
+- Les `actions` ne sont **pas** dans le DTO : elles sont définies uniquement dans la config ou peuvent être ajoutées dynamiquement
+- La transformation `dtoToCard()` normalise les dates de manière spécifique selon le type de carte (voir `cards.dto.ts`)
 
 ### Architecture du chargement
 
-Le chargement des cartes est centralisé dans le store :
+Le chargement des cartes est centralisé dans le store et utilise le pattern Repository :
 
 **Fichier** : `src/app/store/cardStore.ts`
 
@@ -599,20 +620,20 @@ Le chargement des cartes est centralisé dans le store :
 export const useCardStore = create<CardState>((set, get) => ({
   // ... autres propriétés
 
-  loadCards: async () => {
-    if (get().isInitialized) return // Ne charge qu'une seule fois
+  loadCards: async (repo: CardRepository) => {
+    // Évite de recharger si déjà initialisé
+    if (get().isInitialized) return
 
     set({ isLoading: true, error: null })
-
     try {
-      // Tente de charger depuis le backend
-      const apiCards = await fetchCardsFromBackend()
-      const cards = createCardsFromApiData(apiCards)
+      // Charge depuis le repository (API ou JSON selon l'environnement)
+      const cards = await repo.list()
       set({ cards, isInitialized: true, isLoading: false })
-    } catch (error) {
-      // Fallback vers les mocks si l'API n'est pas disponible
-      const mockCards = generateMockCards(9)
-      set({ cards: mockCards, isInitialized: true, isLoading: false })
+    } catch (e) {
+      set({
+        isLoading: false,
+        error: e instanceof Error ? e.message : 'Unknown error',
+      })
     }
   },
 }))
@@ -621,46 +642,75 @@ export const useCardStore = create<CardState>((set, get) => ({
 **Fichier** : `src/app/providers.tsx`
 
 ```typescript
+export function Providers({ children }: ProvidersProps) {
+  // Crée le repository selon l'environnement
+  const repo = useMemo(() => {
+    return import.meta.env.DEV
+      ? new JsonCardRepository()  // Développement : fichier JSON
+      : new ApiCardRepository('/api')  // Production : API backend
+  }, [])
+
+  return (
+    <ThemeProvider>
+      <InteractionProvider>
+        <DataProvider cardRepo={repo}>
+          <AppInitializer>
+            {children || <RouterProvider router={router} />}
+          </AppInitializer>
+        </DataProvider>
+      </InteractionProvider>
+    </ThemeProvider>
+  )
+}
+
 function AppInitializer({ children }: { children: ReactNode }) {
   // Charge les cartes une seule fois au démarrage
   useInitializeCards()
   return <>{children}</>
 }
+```
 
-export function Providers({ children }: ProvidersProps) {
-  return (
-    <ThemeProvider>
-      <InteractionProvider>
-        <AppInitializer>
-          {children || <RouterProvider router={router} />}
-        </AppInitializer>
-      </InteractionProvider>
-    </ThemeProvider>
-  )
+**Fichier** : `src/app/hooks/useInitializeCards.ts`
+
+```typescript
+export function useInitializeCards() {
+  const loadCards = useCardStore(state => state.loadCards)
+  const isInitialized = useCardStore(state => state.isInitialized)
+  const repo = useCardRepo()  // Récupère le repository depuis le contexte
+
+  useEffect(() => {
+    // Charge les cartes une seule fois au montage
+    if (!isInitialized) {
+      loadCards(repo)
+    }
+  }, [loadCards, isInitialized, repo])
 }
 ```
 
-**Important** : Les composants n'ont **pas besoin** de charger les cartes manuellement. Ils doivent simplement accéder au store avec `useCardStore()`.
+**Important** : Les composants n'ont **pas besoin** de charger les cartes manuellement. Ils doivent simplement accéder au store avec `useCardStore()`. Le chargement se fait automatiquement au démarrage via `useInitializeCards()`.
 
 ### Normalisation automatique
 
-La fonction `createCardFromApiData()` effectue automatiquement :
+La fonction `dtoToCard()` (utilisée par les repositories) effectue automatiquement :
 
-- ✅ Conversion des dates ISO strings → objets `Date`
-- ✅ Normalisation récursive des dates dans les payloads (nested objects, arrays)
-- ✅ Vérification que le blueprint est enregistré pour le type de carte
+- ✅ Conversion des dates ISO strings → objets `Date` pour `createdAt` et `updatedAt`
+- ✅ Normalisation spécifique des dates dans les payloads selon le type de carte
+- ✅ Extraction du `title` depuis le payload si absent au niveau racine
 - ✅ Préservation de toutes les données du backend (aucune valeur mockée n'est utilisée)
 
-### Blueprints et données backend
+**Note** : La normalisation des dates dans le payload est spécifique à chaque type de carte. Si vous créez un nouveau type de carte avec des dates dans le payload, vous devrez ajouter la logique de normalisation dans `normalizePayload()` de `cards.dto.ts`.
 
-Même si les données viennent du backend, les **blueprints restent essentiels** car ils :
+**Note** : La normalisation est spécifique à chaque type de carte pour garantir la cohérence. Si vous créez un nouveau type de carte avec des dates dans le payload, ajoutez la logique correspondante dans `normalizePayload()`.
 
-1. **Définissent les actions par défaut** via `actions()` (fusionnées avec celles du backend si présentes)
-2. **Spécifient les connecteurs possibles** (affichés dans l'UI)
-3. **Permettent la génération de données de test** pendant le développement
-4. **Servent de fallback** si des champs optionnels sont manquants
+### Configs et données backend
 
-**Note sur les actions** : Les actions du blueprint servent de **base par défaut**. Si le backend fournit des actions pour une carte spécifique, elles sont fusionnées avec celles du blueprint (les actions du backend ont priorité en cas de conflit).
+Même si les données viennent du backend, les **configs restent essentielles** car elles :
+
+1. **Définissent les actions par défaut** via `actions(card)` (la fonction reçoit la carte pour des actions dynamiques)
+2. **Spécifient les connecteurs possibles** (affichés dans l'UI, utilisés comme fallback si non fournis par le backend)
+3. **Servent de validation** : la config doit être enregistrée pour que le type de carte soit reconnu
+
+**Note sur les actions** : Les actions de la config sont récupérées dynamiquement via `getAvailableActions(card)` qui appelle `config.actions(card)`. La fonction reçoit la carte en paramètre, ce qui permet de définir des actions conditionnelles basées sur l'état de la carte (ex: afficher "Accepter" uniquement si le statut est "pending").
 
 ---
 
@@ -682,27 +732,20 @@ Cependant, ce n'est pas strictement nécessaire car le type `string & {}` permet
 
 ### Utiliser le CardFactory
 
-**Note** : Vous n'avez **pas besoin** d'enregistrer manuellement votre blueprint dans `factory.ts`. L'enregistrement se fait automatiquement via votre fichier `register.ts` (voir Étape 4).
+**Note** : Vous n'avez **pas besoin** d'enregistrer manuellement votre config dans `factory.ts`. L'enregistrement se fait automatiquement via votre fichier `register.ts` (voir Étape 4).
 
-Le `CardFactory` est utilisé :
+Le `CardFactory` est utilisé pour :
 
-- **Pour les mocks/tests** : `cardFactory.createMany('ma-carte', 5)` génère 5 cartes mockées
-- **Pour transformer les données backend** : `createCardFromApiData()` utilise le factory en interne
-- **Les blueprints sont enregistrés automatiquement** lors de l'import de `register.ts` dans `providers.tsx`
+- **Gérer les configurations** : Les configs sont enregistrées automatiquement lors de l'import de `register.ts` dans `providers.tsx`
+- **Récupérer les actions** : `getAvailableActions(card)` utilise `cardFactory.getConfig()` pour récupérer les actions
 
-Si vous devez créer des cartes manuellement dans du code de test, le blueprint sera déjà disponible :
+**Méthodes disponibles** :
 
-```typescript
-import { cardFactory } from '@/engine/cards/factory'
+- `register(config)` : Enregistre une configuration (appelé automatiquement par `registerCard()`)
+- `getConfig(type)` : Récupère la configuration enregistrée pour un type
+- `listCardTypes()` : Liste tous les types de cartes enregistrés
 
-// Le blueprint est déjà enregistré via register.ts
-const card = cardFactory.create('ma-carte', {
-  payload: {
-    /* votre payload */
-  },
-  title: 'Titre personnalisé',
-})
-```
+**Note** : Les mocks sont gérés séparément via les fixtures JSON dans `src/app/store/fixtures/`. Vous n'avez pas besoin d'utiliser le CardFactory pour créer des cartes mockées.
 
 ---
 
@@ -711,11 +754,12 @@ const card = cardFactory.create('ma-carte', {
 Avant de considérer votre carte comme terminée, vérifiez :
 
 - [ ] **Payload Type** : Interface TypeScript définie avec toutes les propriétés nécessaires
-- [ ] **Blueprint** : Factory définie avec `type`, `defaults`, et `payloadFactory`
+- [ ] **Config** : Configuration définie avec `type`, `actions()` (optionnel), et `connectors` (optionnel)
 - [ ] **Renderer** : Composant React créé utilisant `CardShell` et les composants réutilisables
 - [ ] **Registration** : Fichier `register.ts` créé avec `registerCard()`
 - [ ] **Import** : Fichier `register.ts` importé dans `providers.tsx`
-- [ ] **Actions** (optionnel) : Actions spécifiques définies dans le blueprint
+- [ ] **Actions** (optionnel) : Actions spécifiques définies dans la config via `actions(card)`
+- [ ] **Normalisation des dates** (si nécessaire) : Si votre payload contient des dates, ajoutez la logique dans `normalizePayload()` de `cards.dto.ts`
 - [ ] **Test visuel** : Vérifier que la carte s'affiche correctement dans l'application
 
 ---
@@ -726,11 +770,11 @@ Pour voir des exemples complets et fonctionnels, consultez :
 
 - **Calendar** : `src/features/calendar/`
   - Payload avec dates et localisation
-  - Blueprint avec génération de dates
+  - Config avec actions et connecteurs
   - Renderer avec header optionnel
 - **Notification** : `src/features/notification/`
   - Payload simple avec message
-  - Blueprint minimal
+  - Config minimal avec actions
   - Renderer avec ContextBubble
 
 ---
@@ -749,7 +793,7 @@ Pour voir des exemples complets et fonctionnels, consultez :
 ### ✅ Faire
 
 - ✅ Utiliser des payloads typés pour la sécurité TypeScript
-- ✅ Définir les actions dans le blueprint (co-location)
+- ✅ Définir les actions dans la config (co-location)
 - ✅ Utiliser `registerCard()` pour simplifier l'enregistrement
 - ✅ Créer des renderers purs (juste affichage)
 - ✅ Utiliser `CardHeader` pour les headers avec sender/source
@@ -767,9 +811,10 @@ Avant de créer une nouvelle carte, posez-vous ces questions :
 1. **Quelles sont les données spécifiques nécessaires ?** → Définissez votre payload
 2. **D'où vient cette carte ?** → Ajoutez `source` dans le payload
 3. **Qui envoie cette carte ?** → Ajoutez `sender` dans le payload
-4. **Quelles actions sont disponibles ?** → Définissez-les dans `card.policy.ts`
+4. **Quelles actions sont disponibles ?** → Définissez-les dans la config via `actions(card)`
 5. **Y a-t-il un message contextuel important ?** → Utilisez `ContextBubble`
-6. **La carte doit-elle être générée automatiquement ?** → Configurez le blueprint
+6. **Les actions doivent-elles être dynamiques ?** → Utilisez `actions(card)` pour des actions conditionnelles basées sur l'état de la carte
+7. **Quels connecteurs sont nécessaires ?** → Ajoutez-les dans la config via `connectors`
 
 ---
 
@@ -779,7 +824,7 @@ Pour créer rapidement une nouvelle carte :
 
 1. Créez le dossier `src/features/ma-carte/`
 2. Définissez `ma-carte.payload.ts` avec votre interface (structure des données du backend)
-3. Créez `ma-carte.card.blueprint.ts` avec la factory (pour les mocks/tests) et les actions
+3. Créez `ma-carte.card.config.ts` avec la configuration (actions, connecteurs)
 4. Implémentez `MaCarteRenderer.tsx` avec `CardShell`
 5. Ajoutez `register.ts` avec `registerCard()`
 6. Importez `register.ts` dans `providers.tsx`
@@ -787,9 +832,10 @@ Pour créer rapidement une nouvelle carte :
 **Pour utiliser les données du backend** :
 
 - Les cartes sont **chargées automatiquement au démarrage** dans `Providers.tsx`
-- Le backend doit renvoyer des données au format `ApiCardData` (dates en ISO string) sur l'endpoint `/api/cards`
-- Les dates seront automatiquement normalisées en objets `Date`
-- En cas d'erreur API, des mocks sont utilisés automatiquement (développement uniquement)
+- Le système utilise un **pattern Repository** : `ApiCardRepository` en production, `JsonCardRepository` en développement
+- Le backend doit renvoyer des données au format `CardDTO` (dates en ISO string) sur l'endpoint `/api/cards`
+- Les dates seront automatiquement normalisées en objets `Date` par `dtoToCard()`
+- Le repository est fourni via `DataProvider` et accessible via `useCardRepo()` si nécessaire
 - Les composants accèdent aux cartes via `useCardStore(state => state.cards)` - **pas besoin de charger manuellement**
 
 Et voilà ! Votre nouvelle carte est prête à être utilisée. 🎉
@@ -799,8 +845,8 @@ Et voilà ! Votre nouvelle carte est prête à être utilisée. 🎉
 ```typescript
 // register.ts
 import { registerCard } from '@/engine/cards/card.registry'
-import { maCarteBlueprint } from './ma-carte.card.blueprint'
+import { maCarteConfig } from './ma-carte.card.config'
 import { MaCarteRenderer } from './MaCarteRenderer'
 
-registerCard(maCarteBlueprint, MaCarteRenderer)
+registerCard(maCarteConfig, MaCarteRenderer)
 ```

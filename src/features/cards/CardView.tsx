@@ -3,7 +3,7 @@
 // ✅ Affiche uniquement le payload de la card via les renderers spécifiques
 
 import { Card } from '../../engine/cards/card.types'
-import { getCardRenderer } from './cardRendererRouter'
+import { getCardRenderer } from './CardRendererRouter'
 
 interface CardViewProps {
   card: Card

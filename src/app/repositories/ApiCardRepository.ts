@@ -1,15 +1,16 @@
+import { dtoToCard } from '@/app/store/fixtures/cards.dto'
 import type { CardRepository } from '@/engine/cards/card.repository'
 import type { Card } from '@/engine/cards/card.types'
-import type { CardDTO } from '@/app/store/fixtures/cards.dto'
-import { dtoToCard } from '@/app/store/fixtures/cards.dto'
+import { fetchCards } from '@/shared/api/cards.api'
 
+/**
+ * Repository pour charger les cartes depuis l'API backend.
+ *
+ * Utilise l'API centralisée dans `src/shared/api/cards.api.ts`.
+ */
 export class ApiCardRepository implements CardRepository {
-    constructor(private baseUrl = '/api') { }
-
-    async list(): Promise<Card[]> {
-        const res = await fetch(`${this.baseUrl}/cards`)
-        if (!res.ok) throw new Error(`Failed to fetch cards (${res.status})`)
-        const dtos = (await res.json()) as CardDTO[]
-        return dtos.map(dtoToCard)
-    }
+  async list(): Promise<Card[]> {
+    const dtos = await fetchCards()
+    return dtos.map(dtoToCard)
+  }
 }

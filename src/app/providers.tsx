@@ -1,16 +1,14 @@
-import '@/features/calendar/register'
-import '@/features/notification/register'
-
+import '@/features/cards/RegisterAll'
 import { ReactNode, useMemo } from 'react'
 import { RouterProvider } from 'react-router-dom'
+import { DataProvider } from './data/DataProvider'
 import { useInitializeCards } from './hooks/useInitializeCards'
 import { InteractionProvider } from './interaction/InteractionProvider'
 import { router } from './router'
 import { ThemeProvider } from './theme/ThemeProvider'
-import { DataProvider } from './data/DataProvider'
 
-import { JsonCardRepository } from '@/app/repositories/JsonCardRepository'
 import { ApiCardRepository } from '@/app/repositories/ApiCardRepository'
+import { JsonCardRepository } from '@/app/repositories/JsonCardRepository'
 
 interface ProvidersProps {
   children?: ReactNode
@@ -30,7 +28,7 @@ export function Providers({ children }: ProvidersProps) {
   const repo = useMemo(() => {
     return import.meta.env.DEV
       ? new JsonCardRepository()
-      : new ApiCardRepository('/api')
+      : new ApiCardRepository()
   }, [])
 
   return (
