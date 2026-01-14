@@ -1,8 +1,8 @@
-import type { Card } from '@/engine/cards/card.types'
 import type { NotificationPayload } from '@/engine/cards/card.payloads'
-import ContextBubble from '@/shared/ui/ContextBubble'
+import type { Card } from '@/engine/cards/card.types'
 import { CardHeader } from '@/features/cards/CardHeader'
 import { CardShell } from '@/features/cards/CardShell'
+import ContextBubble from '@/shared/ui/ContextBubble'
 
 export function NotificationCardRenderer({
   card,
@@ -30,7 +30,7 @@ export function NotificationCardRenderer({
       showTopBorder={true}
     />
   ) : undefined
-
+  console.log('NotificationCardRenderer USED', card.id)
   return (
     <CardShell card={card} header={header} onAction={onAction}>
       <ContextBubble

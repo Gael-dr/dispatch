@@ -130,9 +130,12 @@ function mergeActions(
  * @returns Un tableau d'actions disponibles, fusionnées depuis le backend et le blueprint
  */
 export function getAvailableActions(card: Card): UiAction[] {
+  // Récupérer le blueprint pour ce type de carte
   const blueprint = cardFactory.getBlueprint(card.type)
-  const blueprintActions = blueprint?.actions?.(card)
-
-  // Fusionner les actions du backend (prioritaires) avec celles du blueprint
+  
+  // Récupérer les actions du blueprint (si définies)
+  const blueprintActions = blueprint?.actions ? blueprint.actions(card) : undefined
+  
+  // Fusionner avec les actions du backend (si présentes dans la carte)
   return mergeActions(card.actions, blueprintActions)
 }

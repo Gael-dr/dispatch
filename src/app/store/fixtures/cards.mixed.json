@@ -1,0 +1,52 @@
+[
+    {
+        "id": "calendar-1",
+        "type": "calendar",
+        "status": "pending",
+        "priority": "normal",
+        "createdAt": "2026-01-14T10:00:00.000Z",
+        "updatedAt": "2026-01-14T10:00:00.000Z",
+        "connectors": [
+            "google_calendar"
+        ],
+        "payload": {
+            "title": "Rendez-vous 1",
+            "description": "Contenu du rendez-vous 1.",
+            "startDate": "2026-01-15T09:00:00.000Z",
+            "endDate": "2026-01-15T10:00:00.000Z",
+            "severity": "info",
+            "context": {
+                "message": "Message important à lire."
+            },
+            "location": "Paris",
+            "sender": {
+                "name": "John Doe",
+                "role": "CEO",
+                "initials": "JD",
+                "avatar": "https://via.placeholder.com/150"
+            },
+            "source": {
+                "type": "gmail",
+                "label": "Gmail"
+            }
+        }
+    },
+    {
+        "id": "notification-1",
+        "type": "notification",
+        "status": "pending",
+        "priority": "low",
+        "createdAt": "2026-01-14T10:02:00.000Z",
+        "updatedAt": "2026-01-14T10:02:00.000Z",
+        "connectors": [
+            "slack"
+        ],
+        "payload": {
+            "title": "Nouvelle notification",
+            "message": "Ping #813",
+            "severity": "warning",
+            "read": false,
+            "timestamp": "2026-01-14T10:02:00.000Z"
+        }
+    }
+]

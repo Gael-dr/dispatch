@@ -17,3 +17,8 @@ export function registerCardRenderer(type: CardTypeId, renderer: CardRenderer) {
 export function getCardRendererFor(type: CardTypeId): CardRenderer | undefined {
   return UI_RENDERERS[type]
 }
+
+// ✅ debug temporaire
+export function __debugRenderers() {
+    return Object.keys(UI_RENDERERS)
+}

@@ -1,8 +1,6 @@
 import type { Card } from '@/engine/cards/card.types'
-import { createCardsFromApiData } from '@/engine/cards/card.utils'
-import { fetchCardsFromBackend } from '@/features/cards/api/cards.api'
+import type { CardRepository } from '@/engine/cards/card.repository'
 import { create } from 'zustand'
-import { generateMockCards } from './mockCards'
 
 export interface CardState {
   cards: Card[]
@@ -11,21 +9,15 @@ export interface CardState {
   error: string | null
   isInitialized: boolean // Indique si les cards ont été chargées au démarrage
 
+  loadCards: (repo: CardRepository) => Promise<void>
   setCards: (cards: Card[]) => void
   addCard: (card: Card) => void
   removeCard: (cardId: string) => void
   updateCard: (cardId: string, updates: Partial<Card>) => void
   selectCard: (cardId: string | null) => void
-
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
-
-  /**
-   * Charge les cartes depuis le backend au démarrage de l'application.
-   * Utilise les mocks si l'API échoue ou n'est pas disponible.
-   */
-  loadCards: () => Promise<void>
 
   markCardDone: (cardId: string) => void
   skipCard: (cardId: string) => void
@@ -43,20 +35,30 @@ export const useCardStore = create<CardState>((set, get) => ({
   error: null,
   isInitialized: false,
 
+  loadCards: async repo => {
+    // Évite de recharger si déjà initialisé
+    if (get().isInitialized) return
+
+    set({ isLoading: true, error: null })
+    try {
+      const cards = await repo.list()
+      set({ cards, isInitialized: true, isLoading: false })
+    } catch (e) {
+      set({
+        isLoading: false,
+        error: e instanceof Error ? e.message : 'Unknown error',
+      })
+    }
+  },
+
   setCards: cards => set({ cards }),
-
-  addCard: card =>
-    set(state => ({
-      cards: [...state.cards, card],
-    })),
-
+  addCard: card => set(state => ({ cards: [...state.cards, card] })),
   removeCard: cardId =>
     set(state => ({
       cards: state.cards.filter(card => card.id !== cardId),
       selectedCardId:
         state.selectedCardId === cardId ? null : state.selectedCardId,
     })),
-
   updateCard: (cardId, updates) =>
     set(state => ({
       cards: state.cards.map(card =>
@@ -65,7 +67,6 @@ export const useCardStore = create<CardState>((set, get) => ({
           : card
       ),
     })),
-
   selectCard: cardId => set({ selectedCardId: cardId }),
 
   markCardDone: cardId => {
@@ -82,12 +83,13 @@ export const useCardStore = create<CardState>((set, get) => ({
       null
 
     get().selectCard(next?.id ?? null)
-    // TODO backend: PATCH /cards/:id/mark-done
+
+    // TODO API: repo.markDone(cardId)
   },
 
   skipCard: cardId => {
     get().updateCard(cardId, { status: 'skipped' })
-    // TODO backend: PATCH /cards/:id/skip
+    // TODO API: repo.skip(cardId)
   },
 
   totalCards: () => get().cards.length,
@@ -101,32 +103,4 @@ export const useCardStore = create<CardState>((set, get) => ({
   setLoading: loading => set({ isLoading: loading }),
   setError: error => set({ error }),
   clearError: () => set({ error: null }),
-
-  loadCards: async () => {
-    // Évite de recharger si déjà initialisé
-    if (get().isInitialized) return
-
-    set({ isLoading: true, error: null })
-
-    try {
-      // Tenter de charger depuis le backend
-      const apiCards = await fetchCardsFromBackend()
-      const cards = createCardsFromApiData(apiCards)
-      set({ cards, isInitialized: true, isLoading: false })
-    } catch (error) {
-      // En cas d'erreur (API non disponible, erreur réseau, etc.)
-      // Utiliser les mocks pour le développement
-      console.warn(
-        'Impossible de charger les cartes depuis le backend, utilisation des mocks:',
-        error
-      )
-      const mockCards = generateMockCards(9)
-      set({
-        cards: mockCards,
-        isInitialized: true,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
-      })
-    }
-  },
 }))
