@@ -1,5 +1,5 @@
 import type { Card } from '@/engine/cards/card.types'
-import { __debugRenderers, getCardRendererFor } from './CardRenderers.registry'
+import { __debugRenderers, getCardRendererFor } from './cardRenderers.registry'
 import { CardShell } from './CardShell'
 
 export function getCardRenderer(card: Card, onAction?: (actionId: string) => void) {

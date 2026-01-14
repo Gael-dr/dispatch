@@ -76,45 +76,43 @@ export function getQuickActions(): UiAction[] {
 }
 
 /**
- * Fusionne les actions du backend avec celles du blueprint.
- * Les actions du backend ont priorité sur celles du blueprint.
+ * Fusionne les actions du backend avec celles de la config.
+ * Les actions du backend ont priorité sur celles de la config.
  * Si deux actions ont le même `id`, celle du backend est conservée.
  *
  * @param backendActions - Actions venant du backend (optionnel)
- * @param blueprintActions - Actions définies dans le blueprint (optionnel)
+ * @param configActions - Actions définies dans la config (optionnel)
  * @returns Tableau d'actions fusionnées sans doublons
  */
 function mergeActions(
   backendActions?: UiAction[],
-  blueprintActions?: UiAction[]
+  configActions?: UiAction[]
 ): UiAction[] {
   // Si aucune action, retourner un tableau vide
-  if (!backendActions && !blueprintActions) {
+  if (!backendActions && !configActions) {
     return []
   }
 
   // Si seulement les actions du backend, les retourner telles quelles
-  if (backendActions && !blueprintActions) {
+  if (backendActions && !configActions) {
     return backendActions
   }
 
-  // Si seulement les actions du blueprint, les retourner telles quelles
-  if (!backendActions && blueprintActions) {
-    return blueprintActions
+  // Si seulement les actions de la config, les retourner telles quelles
+  if (!backendActions && configActions) {
+    return configActions
   }
 
   // Fusion : les actions du backend ont priorité
-  const backendActionIds = new Set(
-    backendActions!.map(action => action.id)
-  )
+  const backendActionIds = new Set(backendActions!.map(action => action.id))
 
   // Commencer par les actions du backend (priorité)
   const merged = [...backendActions!]
 
-  // Ajouter les actions du blueprint qui n'existent pas déjà
-  for (const blueprintAction of blueprintActions!) {
-    if (!backendActionIds.has(blueprintAction.id)) {
-      merged.push(blueprintAction)
+  // Ajouter les actions de la config qui n'existent pas déjà
+  for (const configAction of configActions!) {
+    if (!backendActionIds.has(configAction.id)) {
+      merged.push(configAction)
     }
   }
 
@@ -123,19 +121,21 @@ function mergeActions(
 
 /**
  * Récupère les actions disponibles pour une carte.
- * Fusionne les actions du backend (si présentes dans la carte) avec celles définies dans le blueprint.
- * Les actions du backend ont priorité sur celles du blueprint en cas de conflit (même `id`).
+ * Fusionne les actions du backend (si présentes dans la carte) avec celles définies dans la config.
+ * Les actions du backend ont priorité sur celles de la config en cas de conflit (même `id`).
  *
  * @param card - La carte pour laquelle récupérer les actions
- * @returns Un tableau d'actions disponibles, fusionnées depuis le backend et le blueprint
+ * @returns Un tableau d'actions disponibles, fusionnées depuis le backend et la config
  */
 export function getAvailableActions(card: Card): UiAction[] {
-  // Récupérer le blueprint pour ce type de carte
-  const blueprint = cardFactory.getBlueprint(card.type)
-  
-  // Récupérer les actions du blueprint (si définies)
-  const blueprintActions = blueprint?.actions ? blueprint.actions(card) : undefined
-  
+  // Récupérer la config pour ce type de carte
+  const config = cardFactory.getConfig(card.type)
+
+  // Récupérer les actions de la config (si définies)
+  const configActions = config?.actions
+    ? config.actions(card)
+    : undefined
+
   // Fusionner avec les actions du backend (si présentes dans la carte)
-  return mergeActions(card.actions, blueprintActions)
+  return mergeActions(card.actions, configActions)
 }

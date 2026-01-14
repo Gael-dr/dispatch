@@ -21,7 +21,7 @@ export type Card<TPayload = unknown> = {
   connectors?: string[]
   /**
    * Actions spécifiques à cette carte, venant du backend.
-   * Ces actions ont priorité sur celles définies dans le blueprint.
+   * Ces actions ont priorité sur celles définies dans la config.
    */
   actions?: UiAction[]
 }
