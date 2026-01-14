@@ -16,7 +16,9 @@ export function CardShell({
     onAction?: (actionId: string) => void
     footerClassName?: string
 }) {
+
     return (
+
         <div className="w-full min-h-100 max-h-150 h-[60vh] sm:h-125 md:h-137.5 rounded-4xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col">
             {header}
 

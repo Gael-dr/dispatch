@@ -1,12 +1,15 @@
 import { create } from 'zustand'
 import type { Card } from '@/engine/cards/card.types'
-import { generateMockCards } from './mockCards'
+import type { CardRepository } from '@/engine/cards/card.repository'
 
 export interface CardState {
   cards: Card[]
   selectedCardId: string | null
   isLoading: boolean
   error: string | null
+
+  // NEW
+  loadCards: (repo: CardRepository) => Promise<void>
 
   setCards: (cards: Card[]) => void
   addCard: (card: Card) => void
@@ -28,31 +31,37 @@ export interface CardState {
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
-  cards: generateMockCards(9),
+  cards: [], // ✅ vide au départ (comme en réel)
   selectedCardId: null,
   isLoading: false,
   error: null,
 
+  loadCards: async repo => {
+    set({ isLoading: true, error: null })
+    try {
+      const cards = await repo.list()
+      set({ cards, isLoading: false })
+    } catch (e) {
+      set({
+        isLoading: false,
+        error: e instanceof Error ? e.message : 'Unknown error',
+      })
+    }
+  },
+
   setCards: cards => set({ cards }),
-
-  addCard: card =>
-    set(state => ({
-      cards: [...state.cards, card],
-    })),
-
+  addCard: card => set(state => ({ cards: [...state.cards, card] })),
   removeCard: cardId =>
     set(state => ({
       cards: state.cards.filter(card => card.id !== cardId),
       selectedCardId: state.selectedCardId === cardId ? null : state.selectedCardId,
     })),
-
   updateCard: (cardId, updates) =>
     set(state => ({
       cards: state.cards.map(card =>
-        card.id === cardId ? { ...card, ...updates, updatedAt: new Date() } : card,
+        card.id === cardId ? { ...card, ...updates, updatedAt: new Date() } : card
       ),
     })),
-
   selectCard: cardId => set({ selectedCardId: cardId }),
 
   markCardDone: cardId => {
@@ -69,12 +78,13 @@ export const useCardStore = create<CardState>((set, get) => ({
       null
 
     get().selectCard(next?.id ?? null)
-    // TODO backend: PATCH /cards/:id/mark-done
+
+    // TODO API: repo.markDone(cardId)
   },
 
   skipCard: cardId => {
     get().updateCard(cardId, { status: 'skipped' })
-    // TODO backend: PATCH /cards/:id/skip
+    // TODO API: repo.skip(cardId)
   },
 
   totalCards: () => get().cards.length,

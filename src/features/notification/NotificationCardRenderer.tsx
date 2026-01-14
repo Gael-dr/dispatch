@@ -24,7 +24,7 @@ export function NotificationCardRenderer({
                 showTopBorder={true}
             />
         ) : undefined
-
+    console.log('NotificationCardRenderer USED', card.id)
     return (
         <CardShell card={card} header={header} onAction={onAction}>
             <ContextBubble severity={payload.severity} message={payload.context?.message} />

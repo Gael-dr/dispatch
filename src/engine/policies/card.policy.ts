@@ -73,5 +73,11 @@ const DEFAULT_ACTIONS_BY_TYPE: Record<'calendar' | 'notification', UiAction[]> =
 export function getAvailableActions(card: Card): UiAction[] {
   if (card.type === 'calendar') return DEFAULT_ACTIONS_BY_TYPE.calendar
   if (card.type === 'notification') return DEFAULT_ACTIONS_BY_TYPE.notification
-  return []
+
+  // ✅ fallback safe (sinon UI sans boutons)
+  return [
+    { id: 'fallback-defer', type: 'defer', label: 'PLUS TARD' },
+    { id: 'fallback-done', type: 'mark-done', label: 'FAIT' },
+    { id: 'fallback-ignore', type: 'ignore', label: 'IGNORER' },
+  ]
 }

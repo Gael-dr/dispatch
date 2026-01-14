@@ -1,3 +1,4 @@
+import { useCardRepo } from '@/app/data/DataProvider'
 import { useCardStore } from '@/app/store/cardStore'
 import { CardStack } from '@/features/cards/CardStack'
 import { UserAvatar } from '@/features/user/UserAvatar'
@@ -5,52 +6,44 @@ import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Decisions() {
-  const { doneCards, totalCards, progressPercentage, cards, markCardDone } =
-    useCardStore()
   const navigate = useNavigate()
+  const repo = useCardRepo()
 
-  // Calculer les statistiques
-  // const stats = useMemo(() => {
-  //   const total = cards.length
-  //   const processed = cards.filter(card => {
-  //     // Nouvelle structure : status dans payload
-  //     if (card.payload && typeof card.payload === 'object') {
-  //       const payload = card.payload as Record<string, unknown>
-  //       return payload.status === 'processed'
-  //     }
-  //     // Compatibilité ancienne structure
-  //     const legacyCard = card as unknown as {
-  //       metadata?: Record<string, unknown>
-  //     }
-  //     return legacyCard.metadata?.status === 'processed'
-  //   }).length
-  //   const pending = total - processed
-  //   const progress = total > 0 ? (processed / total) * 100 : 0
+  const cards = useCardStore(s => s.cards)
+  const isLoading = useCardStore(s => s.isLoading)
+  const loadCards = useCardStore(s => s.loadCards)
 
-  //   return { total, processed, pending, progress }
-  // }, [cards])
+  const doneCards = useCardStore(s => s.doneCards)
+  const totalCards = useCardStore(s => s.totalCards)
+  const progressPercentage = useCardStore(s => s.progressPercentage)
+  const markCardDone = useCardStore(s => s.markCardDone)
 
-  // Filtrer les cartes non traitées pour l'affichage
+  // Si quelqu'un arrive direct sur /decisions (refresh), on charge aussi ici
+  useEffect(() => {
+    if (cards.length === 0 && !isLoading) {
+      loadCards(repo)
+    }
+  }, [cards.length, isLoading, loadCards, repo])
+
+  // Cards à traiter (pending uniquement)
   const pendingCards = useMemo(
-    () => cards.filter(card => card.status !== 'done'),
+    () => cards.filter(card => card.status === 'pending'),
     [cards]
   )
 
-  // Rediriger vers le dashboard quand il n'y a plus de cartes
+  // Rediriger vers le dashboard quand il n'y a plus de cards pending
   useEffect(() => {
-    if (pendingCards.length === 0 && cards.length > 0) {
-      // Attendre un court délai pour laisser l'animation de la dernière carte se terminer
+    if (!isLoading && pendingCards.length === 0 && cards.length > 0) {
       const timer = setTimeout(() => {
         navigate('/dashboard')
       }, 500)
       return () => clearTimeout(timer)
     }
-  }, [pendingCards.length, cards.length, navigate])
+  }, [isLoading, pendingCards.length, cards.length, navigate])
 
   const handleCardAction = (cardId: string, actionId: string) => {
     console.log(`Action ${actionId} sur la carte ${cardId}`)
-    // Ici vous pouvez gérer les actions sur les cartes
-
+    // TODO: mapper actionId -> action métier / API si besoin
     markCardDone(cardId)
   }
 
@@ -65,10 +58,10 @@ export default function Decisions() {
             DISPATCH
           </h1>
           <p className="text-slate-400 font-bold tracking-wide text-xs opacity-80">
-            ⚡️ DON'T READ. DECIDE.
+            ⚡️ DON&apos;T READ. DECIDE.
           </p>
         </div>
-        {/* Compteur de cartes & avatar */}
+
         <div className="flex items-center gap-4">
           <p className="text-sm font-semibold text-foreground">
             {doneCards()} &nbsp;/&nbsp; {totalCards()}
@@ -77,7 +70,6 @@ export default function Decisions() {
         </div>
       </div>
 
-      {/* Barre de progression */}
       <div className="w-full mb-2 px-4">
         <div className="w-full h-1 bg-slate-800/50 rounded-full overflow-hidden">
           <div
