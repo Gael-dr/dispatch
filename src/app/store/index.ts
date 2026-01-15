@@ -14,7 +14,7 @@ export { useUIStore } from './uiStore'
 
 // Types
 export type { CardState } from './cardStore'
-export type { UIState } from './uiStore'
+export type { UIState, ModalData } from './uiStore'
 
 /**
  * Hook pour accéder à plusieurs stores en même temps

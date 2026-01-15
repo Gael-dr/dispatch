@@ -1,5 +1,14 @@
 import { create } from 'zustand'
 
+/**
+ * Type pour les données d'une modal
+ */
+export interface ModalData {
+  actionId: string
+  cardId?: string
+  [key: string]: unknown
+}
+
 export interface UIState {
   // State
   sidebarOpen: boolean
@@ -12,6 +21,9 @@ export interface UIState {
       end: Date | null
     }
   }
+  // Modal state
+  modalOpen: boolean
+  modalData: ModalData | null
 
   // Actions
   toggleSidebar: () => void
@@ -20,6 +32,9 @@ export interface UIState {
   setViewMode: (mode: 'grid' | 'list') => void
   setFilters: (filters: Partial<UIState['filters']>) => void
   clearFilters: () => void
+  // Modal actions
+  openModal: (data: ModalData) => void
+  closeModal: () => void
 }
 
 export const useUIStore = create<UIState>(set => ({
@@ -28,6 +43,8 @@ export const useUIStore = create<UIState>(set => ({
   theme: 'dark', // Dark mode par défaut
   viewMode: 'list',
   filters: {},
+  modalOpen: false,
+  modalData: null,
 
   // Actions
   toggleSidebar: () =>
@@ -47,4 +64,22 @@ export const useUIStore = create<UIState>(set => ({
     })),
 
   clearFilters: () => set({ filters: {} }),
+
+  // Modal actions
+  openModal: (data: ModalData) => {
+    // On définit d'abord les données, puis on ouvre la modal pour éviter les animations bizarres
+    set({ modalData: data })
+    // Petit délai pour que les données soient prêtes avant l'animation
+    requestAnimationFrame(() => {
+      set({ modalOpen: true })
+    })
+  },
+
+  closeModal: () => {
+    set({ modalOpen: false })
+    // On garde les données un peu pour les animations, puis on les nettoie
+    setTimeout(() => {
+      set({ modalData: null })
+    }, 200)
+  },
 }))

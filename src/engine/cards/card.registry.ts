@@ -1,5 +1,5 @@
-import type { CardRenderer } from '@/features/cards/cardRenderers.registry'
-import { registerCardRenderer } from '@/features/cards/cardRenderers.registry'
+import type { CardRenderer } from '@/features/cards/CardRenderers.registry'
+import { registerCardRenderer } from '@/features/cards/CardRenderers.registry'
 import type { CardConfig } from './cards.config'
 import { cardFactory } from './factory'
 
