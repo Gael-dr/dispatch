@@ -15,12 +15,18 @@ import {
 } from '@/shared/ui/dialog'
 
 import { CalendarIcon } from 'lucide-react'
+import { useMemo } from 'react'
 import { DaySelector } from './components/DaySelector'
 import { TimeSlotGrid } from './components/TimeSlotGrid'
 import { useAppointmentsForDate } from './hooks/useAppointmentsForDate'
 import { useScheduleSelection } from './hooks/useScheduleSelection'
 import { useSlotMeta } from './hooks/useSlotMeta'
-import { formatDate, formatDateInput } from './utils/calendarDateUtils'
+import {
+  addMinutesToTime,
+  formatDate,
+  formatDateInput,
+  toSlotDateTime,
+} from './utils/calendarDateUtils'
 
 /**
  * Horaires disponibles pour la sélection
@@ -46,7 +52,7 @@ const TIME_SLOTS = [
   '17:30',
 ]
 
-const APPOINTMENT_GAP_WARNING_MINUTES = 15
+const APPOINTMENT_GAP_WARNING_MINUTES = 0
 
 interface ScheduleTimeModalProps {
   onConfirm: (date: string, startTime: string, endTime: string) => void
@@ -68,6 +74,7 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
     resetSelection,
     selectStartTime,
     selectEndTime,
+    forceEndTime,
   } = useScheduleSelection(() => formatDateInput(new Date()))
   const { appointments, loading, error } = useAppointmentsForDate(
     selectedDate,
@@ -91,16 +98,48 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
     resetSelection()
   }
 
-  const slotMeta = useSlotMeta({
+  const startSlotMeta = useSlotMeta({
     appointments,
     selectedDate,
     times: TIME_SLOTS,
     warningMinutes: APPOINTMENT_GAP_WARNING_MINUTES,
   })
+  const endSlotMeta = useSlotMeta({
+    appointments,
+    selectedDate,
+    times: TIME_SLOTS,
+    warningMinutes: APPOINTMENT_GAP_WARNING_MINUTES,
+    includeStartBoundary: false,
+  })
+
+  const maxEndBoundary = useMemo(() => {
+    if (!selectedDate || !selectedStartTime) return null
+    const startDateTime = toSlotDateTime(selectedDate, selectedStartTime)
+    const futureStarts = appointments
+      .map(appointment => new Date(appointment.start))
+      .filter(start => start > startDateTime)
+      .sort((a, b) => a.getTime() - b.getTime())
+    return futureStarts[0] ?? null
+  }, [appointments, selectedDate, selectedStartTime])
+
+  const isLastSlot = (time: string) =>
+    time === TIME_SLOTS[TIME_SLOTS.length - 1]
+
+  const handleStartSelect = (time: string) => {
+    selectStartTime(time)
+    if (isLastSlot(time)) {
+      forceEndTime(addMinutesToTime(selectedDate, time, 60))
+    }
+  }
 
   // Filtrer les horaires disponibles pour la fin (doivent être après le début)
   const availableEndTimes = selectedStartTime
-    ? TIME_SLOTS.filter(time => time > selectedStartTime)
+    ? TIME_SLOTS.filter(time => {
+        if (time <= selectedStartTime) return false
+        if (!maxEndBoundary) return true
+        const endDateTime = toSlotDateTime(selectedDate, time)
+        return endDateTime <= maxEndBoundary
+      })
     : []
 
   return (
@@ -157,8 +196,8 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
                   <TimeSlotGrid
                     times={TIME_SLOTS}
                     selectedTime={selectedStartTime}
-                    slotMeta={slotMeta}
-                    onSelect={selectStartTime}
+                    slotMeta={startSlotMeta}
+                    onSelect={handleStartSelect}
                   />
                 </div>
               </AccordionContent>
@@ -177,7 +216,7 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
                     <TimeSlotGrid
                       times={availableEndTimes}
                       selectedTime={selectedEndTime}
-                      slotMeta={slotMeta}
+                      slotMeta={endSlotMeta}
                       onSelect={selectEndTime}
                     />
                   </div>

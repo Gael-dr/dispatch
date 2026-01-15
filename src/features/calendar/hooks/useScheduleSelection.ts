@@ -30,6 +30,11 @@ export const useScheduleSelection = (getDefaultDate: () => string) => {
     }
   }
 
+  const forceEndTime = (time: string) => {
+    setSelectedEndTime(time)
+    setAccordionValue('')
+  }
+
   return {
     accordionValue,
     selectedDate,
@@ -40,5 +45,6 @@ export const useScheduleSelection = (getDefaultDate: () => string) => {
     resetSelection,
     selectStartTime,
     selectEndTime,
+    forceEndTime,
   }
 }

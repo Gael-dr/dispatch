@@ -33,3 +33,15 @@ export const formatTime = (value: string) =>
 
 export const toSlotDateTime = (date: string, time: string) =>
   new Date(`${date}T${time}:00`)
+
+export const addMinutesToTime = (
+  date: string,
+  time: string,
+  minutes: number
+) => {
+  const base = toSlotDateTime(date, time)
+  base.setMinutes(base.getMinutes() + minutes)
+  const hours = `${base.getHours()}`.padStart(2, '0')
+  const mins = `${base.getMinutes()}`.padStart(2, '0')
+  return `${hours}:${mins}`
+}

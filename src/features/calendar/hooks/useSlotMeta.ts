@@ -8,11 +8,13 @@ export const useSlotMeta = ({
   selectedDate,
   times,
   warningMinutes,
+  includeStartBoundary = true,
 }: {
   appointments: Appointment[]
   selectedDate: string
   times: string[]
   warningMinutes: number
+  includeStartBoundary?: boolean
 }) =>
   useMemo(() => {
     if (!selectedDate) return {}
@@ -25,7 +27,9 @@ export const useSlotMeta = ({
       appointments.forEach(appointment => {
         const start = new Date(appointment.start)
         const end = new Date(appointment.end)
-        const isOverlapping = slotDateTime >= start && slotDateTime < end
+        const isOverlapping = includeStartBoundary
+          ? slotDateTime >= start && slotDateTime < end
+          : slotDateTime > start && slotDateTime < end
         if (isOverlapping) {
           hasOverlap = true
           return

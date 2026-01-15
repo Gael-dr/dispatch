@@ -5,11 +5,17 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 
 const buildMockAppointments = (date: string): Appointment[] => [
+    {
+      id: 'mock-1',
+      title: 'Rendez-vous avec le client',
+      start: `${date}T09:00:00`,
+      end: `${date}T10:00:00`,
+  },
   {
-    id: 'mock-1',
+    id: 'mock-2',
     title: 'Rendez-vous avec le client',
-    start: `${date}T09:00:00`,
-    end: `${date}T10:00:00`,
+    start: `${date}T11:00:00`,
+    end: `${date}T12:30:00`,
   },
 ]
 

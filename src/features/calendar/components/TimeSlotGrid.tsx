@@ -1,5 +1,5 @@
 import type { Appointment } from '@/shared/api/calendar.api'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Check } from 'lucide-react'
 import { formatTime } from '../utils/calendarDateUtils'
 import { cn } from '@/lib/utils'
 
@@ -35,9 +35,9 @@ export function TimeSlotGrid({
                 w-full flex items-center justify-center px-3 py-3 rounded-xl text-sm font-medium transition-all gap-2
                 ${
                   selectedTime === time
-                    ? 'bg-[#1F3743] text-white shadow-md border border-green-500/60'
+                    ? 'bg-[#1F3743] text-white shadow-md border-[1.5px] border-green-500/60'
                     : hasWarning
-                      ? 'bg-yellow-500/20 text-yellow-100 border border-yellow-500/60 hover:bg-yellow-500/30'
+                      ? 'bg-yellow-500/20 text-yellow-100 border-[1.5px] border-yellow-500/60 hover:bg-yellow-500/30'
                       : 'bg-[#1F3743] text-slate-200 hover:bg-[#1F3743]/80 border'
                 }
               `}
@@ -45,6 +45,7 @@ export function TimeSlotGrid({
                 {hasWarning && (
                   <AlertTriangle className="w-4 h-4 text-yellow-600" />
                 )}
+                {!hasWarning && <Check className="w-4 h-4 text-[#34D399]" />}
                 <span
                   className={cn(
                     'font-extrabold text-lg',
