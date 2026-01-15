@@ -23,8 +23,8 @@ export function ModalManager({
     case 'schedule':
       return (
         <ScheduleTimeModal
-          onConfirm={(startTime, endTime) => {
-            onActionConfirm(actionId, { startTime, endTime })
+          onConfirm={(date, startTime, endTime) => {
+            onActionConfirm(actionId, { date, startTime, endTime })
           }}
         />
       )
