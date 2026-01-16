@@ -88,7 +88,6 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
   const handleConfirm = () => {
     if (selectedDate && selectedStartTime && selectedEndTime) {
       onConfirm(selectedDate, selectedStartTime, selectedEndTime)
-      closeModal()
       resetSelection()
     }
   }
