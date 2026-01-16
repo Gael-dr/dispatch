@@ -11,18 +11,5 @@ export const notificationConfig: CardConfig<NotificationPayload> = {
 
   connectors: ['slack', 'gmail'],
 
-  actions: () => [
-    {
-      id: 'mark-read',
-      type: 'archive',
-      label: 'Marquer comme lu',
-      requiresConfirmation: false,
-    },
-    {
-      id: 'dismiss',
-      type: 'archive',
-      label: 'Ignorer',
-      requiresConfirmation: false,
-    },
-  ],
+  actions: () => [],
 }
