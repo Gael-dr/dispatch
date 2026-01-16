@@ -52,7 +52,7 @@ const TIME_SLOTS = [
   '17:30',
 ]
 
-const APPOINTMENT_GAP_WARNING_MINUTES = 0
+const APPOINTMENT_GAP_WARNING_MINUTES = 15
 
 interface ScheduleTimeModalProps {
   onConfirm: (date: string, startTime: string, endTime: string) => void
