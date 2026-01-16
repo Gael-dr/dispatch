@@ -169,11 +169,6 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
                 Chargement des rendez-vous...
               </p>
             )}
-            {error && (
-              <p className="text-xs text-yellow-400 mt-2">
-                Données de test affichées (API indisponible).
-              </p>
-            )}
           </div>
 
           <Accordion
@@ -241,14 +236,19 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={handleCancel}>
+          <Button
+            type="button"
+            variant="secondary"
+            className="py-6 font-bold bg-slate-800"
+            onClick={handleCancel}
+          >
             Annuler
           </Button>
           <Button
             type="button"
             onClick={handleConfirm}
             disabled={!selectedDate || !selectedStartTime || !selectedEndTime}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
+            className="bg-blue-500 hover:bg-blue-600 text-white py-6 font-bold"
           >
             Confirmer
           </Button>
