@@ -1,24 +1,20 @@
+// src/app/modals/ModalManager.tsx (ou ton chemin actuel)
 import { useUIStore } from '@/app/store/uiStore'
 import { ScheduleTimeModal } from '@/features/calendar/ScheduleTimeModal'
+import { ValidationActionModal } from '@/features/calendar/ValidationActionModal'
 
-/**
- * Gestionnaire centralisé des modals
- * Affiche la modal appropriée selon l'actionId
- */
 export function ModalManager({
   onActionConfirm,
 }: {
   onActionConfirm: (actionId: string, data?: unknown) => void
 }) {
+  const modalOpen = useUIStore(state => state.modalOpen)
   const modalData = useUIStore(state => state.modalData)
 
-  if (!modalData) {
-    return null
-  }
+  if (!modalOpen || !modalData) return null
 
   const { actionId } = modalData
 
-  // Gérer les différentes modals selon l'actionId
   switch (actionId) {
     case 'schedule':
       return (
@@ -29,9 +25,14 @@ export function ModalManager({
         />
       )
 
-    // Ajouter d'autres cas ici pour d'autres modals
-    // case 'other-action':
-    //   return <OtherModal ... />
+    case 'accept':
+      return (
+        <ValidationActionModal
+          onConfirm={data => {
+            onActionConfirm(actionId, data)
+          }}
+        />
+      )
 
     default:
       return null

@@ -1,38 +1,39 @@
-// Actions principales des cards - Composant dédié aux actions spécifiques à chaque card
-import { ComponentProps } from 'react'
-import type { UiAction } from '../../engine/policies/card.policy'
-import { getButtonTypeForAction } from '../../engine/policies/card.policy'
-import { ActionBar } from '../../shared/ui/ActionBar'
-import { ActionButton } from '../../shared/ui/ActionButton'
-import { Icon } from '../../shared/ui/Icon'
+// src/features/cards/CardActions.tsx
+import type { ComponentProps } from 'react'
+import type { UiAction } from '@/engine/policies/card.policy'
+import { getButtonTypeForAction } from '@/engine/policies/card.policy'
+import { ActionBar } from '@/shared/ui/ActionBar'
+import { ActionButton } from '@/shared/ui/ActionButton'
+import { Icon } from '@/shared/ui/Icon'
 import { useUIStore } from '@/app/store/uiStore'
 import type { Card } from '@/engine/cards/card.types'
 
 interface CardActionsProps {
   actions: UiAction[]
   onAction?: (actionId: string) => void
-  card?: Card // Ajout de la carte pour passer son ID à la modal
+  card?: Card
 }
 
 /**
  * Liste des actionIds qui nécessitent une modal
  */
-const ACTIONS_WITH_MODAL = ['schedule']
+const ACTIONS_WITH_MODAL = ['schedule', 'accept'] as const
 
 export function CardActions({ actions, onAction, card }: CardActionsProps) {
   const openModal = useUIStore(state => state.openModal)
 
   const handleActionClick = (actionId: string) => {
-    // Si l'action nécessite une modal, on l'ouvre
-    if (ACTIONS_WITH_MODAL.includes(actionId)) {
+    if (ACTIONS_WITH_MODAL.includes(actionId as any)) {
       openModal({
         actionId,
         cardId: card?.id,
+        cardType: card?.type,
+        payload: card?.payload,
       })
-    } else {
-      // Sinon, on appelle directement onAction
-      onAction?.(actionId)
+      return
     }
+
+    onAction?.(actionId)
   }
 
   return (
