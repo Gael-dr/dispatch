@@ -17,7 +17,7 @@ interface CardActionsProps {
 /**
  * Liste des actionIds qui nécessitent une modal
  */
-const ACTIONS_WITH_MODAL = ['schedule', 'accept'] as const
+const ACTIONS_WITH_MODAL = ['schedule', 'accept', 'reject'] as const
 
 export function CardActions({ actions, onAction, card }: CardActionsProps) {
   const openModal = useUIStore(state => state.openModal)

@@ -1,40 +1,40 @@
-// src/app/modals/ModalManager.tsx (ou ton chemin actuel)
+// src/app/modals/ModalManager.tsx
 import { useUIStore } from '@/app/store/uiStore'
 import { ScheduleTimeModal } from '@/features/calendar/ScheduleTimeModal'
-import { ValidationActionModal } from '@/features/calendar/ValidationActionModal'
+import { ActionMessageModal } from '@/features/calendar/ActionMessageModal'
+import { MESSAGE_BUILDERS } from '@/features/calendar/actionMessageTemplates'
 
 export function ModalManager({
   onActionConfirm,
 }: {
   onActionConfirm: (actionId: string, data?: unknown) => void
 }) {
-  const modalOpen = useUIStore(state => state.modalOpen)
-  const modalData = useUIStore(state => state.modalData)
+  const modalOpen = useUIStore(s => s.modalOpen)
+  const modalData = useUIStore(s => s.modalData)
 
   if (!modalOpen || !modalData) return null
 
   const { actionId } = modalData
 
-  switch (actionId) {
-    case 'schedule':
-      return (
-        <ScheduleTimeModal
-          onConfirm={(date, startTime, endTime) => {
-            onActionConfirm(actionId, { date, startTime, endTime })
-          }}
-        />
-      )
-
-    case 'accept':
-      return (
-        <ValidationActionModal
-          onConfirm={data => {
-            onActionConfirm(actionId, data)
-          }}
-        />
-      )
-
-    default:
-      return null
+  if (actionId === 'schedule') {
+    return (
+      <ScheduleTimeModal
+        onConfirm={(date, startTime, endTime) =>
+          onActionConfirm(actionId, { date, startTime, endTime })
+        }
+      />
+    )
   }
+
+  const builder = (MESSAGE_BUILDERS as Record<string, any>)[actionId]
+  if (builder) {
+    return (
+      <ActionMessageModal
+        builder={builder}
+        onConfirm={data => onActionConfirm(actionId, data)}
+      />
+    )
+  }
+
+  return null
 }
