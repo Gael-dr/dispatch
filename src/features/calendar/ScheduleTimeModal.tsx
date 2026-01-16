@@ -76,7 +76,7 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
     selectEndTime,
     forceEndTime,
   } = useScheduleSelection(() => formatDateInput(new Date()))
-  const { appointments, loading, error } = useAppointmentsForDate(
+  const { appointments, loading } = useAppointmentsForDate(
     selectedDate,
     isOpen
   )
