@@ -1,12 +1,4 @@
-import { useState } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog'
+import { useUIStore } from '@/app/store/uiStore'
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +6,27 @@ import {
   AccordionTrigger,
 } from '@/shared/ui/accordion'
 import { Button } from '@/shared/ui/button'
-import { useUIStore } from '@/app/store/uiStore'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog'
+
+import { CalendarIcon } from 'lucide-react'
+import { useMemo } from 'react'
+import { DaySelector } from './components/DaySelector'
+import { TimeSlotGrid } from './components/TimeSlotGrid'
+import { useAppointmentsForDate } from './hooks/useAppointmentsForDate'
+import { useScheduleSelection } from './hooks/useScheduleSelection'
+import { useSlotMeta } from './hooks/useSlotMeta'
+import {
+  addMinutesToTime,
+  formatDate,
+  formatDateInput,
+  toSlotDateTime,
+} from './utils/calendarDateUtils'
 
 /**
  * Horaires disponibles pour la sélection
@@ -26,6 +38,10 @@ const TIME_SLOTS = [
   '10:30',
   '11:00',
   '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
   '14:00',
   '14:30',
   '15:00',
@@ -35,6 +51,8 @@ const TIME_SLOTS = [
   '17:00',
   '17:30',
 ]
+
+const APPOINTMENT_GAP_WARNING_MINUTES = 15
 
 interface ScheduleTimeModalProps {
   onConfirm: (date: string, startTime: string, endTime: string) => void
@@ -46,98 +64,123 @@ interface ScheduleTimeModalProps {
 export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
   const isOpen = useUIStore(state => state.modalOpen)
   const closeModal = useUIStore(state => state.closeModal)
-  const [accordionValue, setAccordionValue] = useState<string | undefined>(
-    'start-time'
+  const {
+    accordionValue,
+    selectedDate,
+    selectedStartTime,
+    selectedEndTime,
+    setAccordionValue,
+    setSelectedDate,
+    resetSelection,
+    selectStartTime,
+    selectEndTime,
+    forceEndTime,
+  } = useScheduleSelection(() => formatDateInput(new Date()))
+  const { appointments, loading, error } = useAppointmentsForDate(
+    selectedDate,
+    isOpen
   )
-  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null)
-  const [selectedEndTime, setSelectedEndTime] = useState<string | null>(null)
 
-  const getTodayDate = () => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = `${today.getMonth() + 1}`.padStart(2, '0')
-    const day = `${today.getDate()}`.padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  const [selectedDate, setSelectedDate] = useState<string>(getTodayDate())
-
-  const handleStartTimeSelect = (time: string) => {
-    setSelectedStartTime(time)
-    setAccordionValue('end-time')
-    // Réinitialiser l'heure de fin si elle est avant la nouvelle heure de début
-    if (selectedEndTime && time >= selectedEndTime) {
-      setSelectedEndTime(null)
-    }
-  }
-
-  const handleEndTimeSelect = (time: string) => {
-    if (selectedStartTime && time > selectedStartTime) {
-      setSelectedEndTime(time)
-    }
+  const handleDateChange = (nextDate: string) => {
+    setSelectedDate(nextDate)
   }
 
   const handleConfirm = () => {
     if (selectedDate && selectedStartTime && selectedEndTime) {
       onConfirm(selectedDate, selectedStartTime, selectedEndTime)
-      closeModal()
-      // Réinitialiser les sélections
-      setAccordionValue('start-time')
-      setSelectedDate(getTodayDate())
-      setSelectedStartTime(null)
-      setSelectedEndTime(null)
+      resetSelection()
     }
   }
 
   const handleCancel = () => {
     closeModal()
-    setAccordionValue('start-time')
-    setSelectedDate(getTodayDate())
-    setSelectedStartTime(null)
-    setSelectedEndTime(null)
+    resetSelection()
+  }
+
+  const startSlotMeta = useSlotMeta({
+    appointments,
+    selectedDate,
+    times: TIME_SLOTS,
+    warningMinutes: APPOINTMENT_GAP_WARNING_MINUTES,
+  })
+  const endSlotMeta = useSlotMeta({
+    appointments,
+    selectedDate,
+    times: TIME_SLOTS,
+    warningMinutes: APPOINTMENT_GAP_WARNING_MINUTES,
+    includeStartBoundary: false,
+  })
+
+  const maxEndBoundary = useMemo(() => {
+    if (!selectedDate || !selectedStartTime) return null
+    const startDateTime = toSlotDateTime(selectedDate, selectedStartTime)
+    const futureStarts = appointments
+      .map(appointment => new Date(appointment.start))
+      .filter(start => start > startDateTime)
+      .sort((a, b) => a.getTime() - b.getTime())
+    return futureStarts[0] ?? null
+  }, [appointments, selectedDate, selectedStartTime])
+
+  const isLastSlot = (time: string) =>
+    time === TIME_SLOTS[TIME_SLOTS.length - 1]
+
+  const handleStartSelect = (time: string) => {
+    selectStartTime(time)
+    if (isLastSlot(time)) {
+      forceEndTime(addMinutesToTime(selectedDate, time, 60))
+    }
   }
 
   // Filtrer les horaires disponibles pour la fin (doivent être après le début)
   const availableEndTimes = selectedStartTime
-    ? TIME_SLOTS.filter(time => time > selectedStartTime)
+    ? TIME_SLOTS.filter(time => {
+        if (time <= selectedStartTime) return false
+        if (!maxEndBoundary) return true
+        const endDateTime = toSlotDateTime(selectedDate, time)
+        return endDateTime <= maxEndBoundary
+      })
     : []
 
-  const formatDate = (value: string) => {
-    if (!value) return ''
-    const [year, month, day] = value.split('-')
-    if (!year || !month || !day) return value
-    return `${day}-${month}-${year}`
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Proposer un créneau</DialogTitle>
-          <DialogDescription>
-            Sélectionnez l'heure de début et de fin pour votre créneau
-          </DialogDescription>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          handleCancel()
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-[500px] gap-2">
+        <DialogHeader className="flex items-start gap-2">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-blue-400" />
+            <DialogTitle className="font-extrabold text-md">
+              Choisir un créneau
+            </DialogTitle>
+          </div>
         </DialogHeader>
 
-        <div className="py-4 space-y-6">
+        <div className="py-4 space-y-4">
           {/* Sélection du jour */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Jour
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={event => setSelectedDate(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="w-full">
+            <DaySelector date={selectedDate} onChange={handleDateChange} />
+            {loading && (
+              <p className="text-xs text-slate-400 mt-2">
+                Chargement des rendez-vous...
+              </p>
+            )}
+            {error && (
+              <p className="text-xs text-yellow-400 mt-2">
+                Données de test affichées (API indisponible).
+              </p>
+            )}
           </div>
 
           <Accordion
             type="single"
             collapsible
             value={accordionValue}
-            onValueChange={setAccordionValue}
+            onValueChange={value => setAccordionValue(value || '')}
             className="w-full"
           >
             <AccordionItem value="start-time">
@@ -148,24 +191,13 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
                 </span>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="grid grid-cols-4 gap-2">
-                  {TIME_SLOTS.map((time) => (
-                    <button
-                      key={`start-${time}`}
-                      type="button"
-                      onClick={() => handleStartTimeSelect(time)}
-                      className={`
-                        px-3 py-2 rounded-lg text-sm font-medium transition-all
-                        ${
-                          selectedStartTime === time
-                            ? 'bg-blue-500 text-white shadow-md'
-                            : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-                        }
-                      `}
-                    >
-                      {time}
-                    </button>
-                  ))}
+                <div className="max-h-56 overflow-y-auto">
+                  <TimeSlotGrid
+                    times={TIME_SLOTS}
+                    selectedTime={selectedStartTime}
+                    slotMeta={startSlotMeta}
+                    onSelect={handleStartSelect}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -179,24 +211,13 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
               </AccordionTrigger>
               <AccordionContent>
                 {selectedStartTime ? (
-                  <div className="grid grid-cols-4 gap-2">
-                    {availableEndTimes.map((time) => (
-                      <button
-                        key={`end-${time}`}
-                        type="button"
-                        onClick={() => handleEndTimeSelect(time)}
-                        className={`
-                          px-3 py-2 rounded-lg text-sm font-medium transition-all
-                          ${
-                            selectedEndTime === time
-                              ? 'bg-blue-500 text-white shadow-md'
-                              : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-                          }
-                        `}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                  <div className="max-h-56 overflow-y-auto">
+                    <TimeSlotGrid
+                      times={availableEndTimes}
+                      selectedTime={selectedEndTime}
+                      slotMeta={endSlotMeta}
+                      onSelect={selectEndTime}
+                    />
                   </div>
                 ) : (
                   <p className="text-sm text-slate-400 italic">
@@ -212,18 +233,15 @@ export function ScheduleTimeModal({ onConfirm }: ScheduleTimeModalProps) {
             <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
               <p className="text-sm text-blue-300">
                 <span className="font-semibold">Créneau sélectionné :</span>{' '}
-                {formatDate(selectedDate)} • {selectedStartTime} - {selectedEndTime}
+                {formatDate(selectedDate)} • {selectedStartTime} -{' '}
+                {selectedEndTime}
               </p>
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-          >
+          <Button type="button" variant="secondary" onClick={handleCancel}>
             Annuler
           </Button>
           <Button
