@@ -23,7 +23,7 @@
                 "name": "John Doe",
                 "role": "CEO",
                 "initials": "JD",
-                "avatar": "https://via.placeholder.com/150"
+                "avatar": "https://randomuser.me/api/portraits/thumb/men/1.jpg"
             },
             "source": {
                 "type": "gmail",
@@ -44,9 +44,12 @@
         "payload": {
             "title": "Nouvelle notification",
             "message": "Ping #813",
-            "severity": "warning",
+            "severity": "error",
             "read": false,
-            "timestamp": "2026-01-14T10:02:00.000Z"
+            "timestamp": "2026-01-14T10:02:00.000Z",
+            "context": {
+                "message": "Surcharge CPU sur le serveur."
+            }
         }
     }
 ]
